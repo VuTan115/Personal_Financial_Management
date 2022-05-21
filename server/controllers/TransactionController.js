@@ -1,18 +1,24 @@
 import mongoose from 'mongoose'
 import Transaction from '../models/Transaction.js'
+import Wallet from '../models/Wallet.js'
 import getWeekDay from '../helpers/getWeekDay.js'
 
 const { ObjectId } = mongoose.Types
 
 const createTransaction = async (req, res) => {
   const {
-    amount, is_output, user_id, category, wallet
+    amount, is_output, category, wallet
   } = req.body
   let newTransaction = new Transaction({
-    amount, is_output, user_id, category, wallet
+    amount, is_output, user_id: req.body.user.uid, category, wallet
   })
   try {
     newTransaction = await newTransaction.save()
+    await Wallet.findOneAndUpdate({ _id: wallet }, {
+      $inc: {
+        amount: is_output ? -amount : amount
+      }
+    })
     return res.status(200).json(newTransaction)
   } catch (error) {
     console.log(error)

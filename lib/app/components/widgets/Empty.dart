@@ -16,7 +16,6 @@ class MyEmptyWidget extends StatelessWidget {
           image: null,
           packageImage: PackageImage.Image_1,
           title: message,
-          
           titleTextStyle: const TextStyle(
             fontSize: 22,
             color: Color(0xff9da9c7),

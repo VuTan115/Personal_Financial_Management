@@ -12,7 +12,7 @@ class BudgetRepository {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<Map<String, dynamic>> res = await Dio().get(
-          '$IPAddress/api/budget',
+          '$IPAddressTan/api/budget',
           options: Options(headers: {'AuthToken': token}),
           queryParameters: {'timestamp': month.toString()});
       Map<String, dynamic>? result = res.data;

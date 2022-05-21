@@ -2,10 +2,10 @@ import Wallet from '../models/Wallet.js'
 
 const createWallet = async (req, res) => {
   const {
-    amount, name, type, user_id, description
+    amount, name, type, description
   } = req.body
   let newWallet = new Wallet({
-    amount, name, type, user_id, description
+    amount, name, type, user_id: req.body.user.uid, description
   })
   try {
     newWallet = await newWallet.save()

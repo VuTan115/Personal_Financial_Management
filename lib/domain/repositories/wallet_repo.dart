@@ -14,7 +14,7 @@ class WalletRepository {
   Future<Map<String, dynamic>> getAllWallets() async {
     String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
     Response<List> res = await Dio().get(
-      '$IPAddress/api/wallet',
+      '$IPAddressTan/api/wallet',
       options: Options(headers: {'AuthToken': token}),
     );
     List? arr = res.data;
@@ -29,5 +29,27 @@ class WalletRepository {
       result[element["type"]].add(new Wallet.fromJson(element));
     });
     return result;
+  }
+
+  Future<Wallet> createWallet(
+    num amount,
+    String name,
+    String type,
+    String description,
+  ) async {
+    String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
+    var data = {
+      "amount": amount,
+      "name": name,
+      "type": type,
+      "description": description
+    };
+    Response<Map<String, dynamic>> res = await Dio().post(
+        '$IPAddressTan/api/wallet',
+        options: Options(headers: {'AuthToken': token}),
+        data: jsonEncode(data));
+    Map<String, dynamic>? json = res.data;
+
+    return Wallet.fromJson(json!);
   }
 }

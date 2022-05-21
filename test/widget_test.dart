@@ -7,11 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:personal_financial_management/app/application.dart';
 import 'package:personal_financial_management/app/pages/login_page.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 
 void main() {
   testWidgets('Login page', (WidgetTester tester) async {
