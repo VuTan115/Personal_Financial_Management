@@ -19,7 +19,7 @@ int getDaysInMonth(int year, int month) {
   return DateTime(year, month + 1).difference(DateTime(year, month)).inDays;
 }
 
-Widget generateIcon(String name) {
+Widget generateCategoryIcon(String name) {
   switch (name) {
     case 'Xăng xe':
       return MyAppIcons.build;
@@ -48,6 +48,24 @@ Widget generateIcon(String name) {
   }
 }
 
+Widget generateWalletIcon(String name) {
+  switch (name) {
+    case 'bank':
+      return MyAppIcons.bank;
+    case "stock":
+      return MyAppIcons.development;
+    case "e_wallet":
+      return MyAppIcons.smartPhone;
+    case "credit":
+      return MyAppIcons.creditCard;
+    case "cash":
+      return MyAppIcons.banknote;
+
+    default:
+      return const Icon(Icons.cases_sharp);
+  }
+}
+
 Widget buildListTileExpense({
   String title = '',
   String subtitle = '',
@@ -58,7 +76,7 @@ Widget buildListTileExpense({
     padding: const EdgeInsets.symmetric(horizontal: 8),
     child: ListTile(
       onTap: () {},
-      leading: generateIcon(title),
+      leading: generateCategoryIcon(title),
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: Text(

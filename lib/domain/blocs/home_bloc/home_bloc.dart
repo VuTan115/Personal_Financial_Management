@@ -44,7 +44,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       weekTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       monthTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       Map<String, dynamic> allWallets = await _walletRepository.getAllWallets();
-
+      List<t.Transaction> walletTransactions = await _transactionRepository
+          .getWalletTransactions('62850f110946e496d4fba97f');
       Map<String, List<t.Transaction>>? transactionMap = {
         "day": todayTransactions,
         "week": weekTransactions,

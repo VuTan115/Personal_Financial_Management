@@ -7,10 +7,10 @@ class WalletState extends Equatable {
   final List<t.Transaction> walletTransitions;
 
   WalletState copyWith({
-    List<t.Transaction> walletTransitions = const [],
+    List<t.Transaction>? walletTransitions,
   }) {
     return WalletState(
-      walletTransitions: walletTransitions,
+      walletTransitions: walletTransitions ?? this.walletTransitions,
     );
   }
 

@@ -39,144 +39,146 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (loginBlocContext) => LoginBloc(
-          authenticationRepository:
-              RepositoryProvider.of<AuthenticationRepository>(context)),
-      child: SafeArea(
-        child: BlocListener<LoginBloc, LoginState>(
-          listener: (context, state) {
-            if (state.status == loginStatus.success) {
-              BlocProvider.of<AuthenticationBloc>(context).add(
-                  const AuthenticationStatusChanged(
-                      AuthenticationStatus.authenticated));
-            }
-            if (state.status == loginStatus.loading) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text('Đang đăng nhâp...'),
-                duration: Duration(seconds: 1),
-              ));
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return WaitingIndicator();
-                  });
-            }
-            if (state.status == loginStatus.failure) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text(
-                    'Đăng nhập thất bại! Vui lòng kiểm tra lại tên đăng nhập và mật khẩu!'),
-                duration: Duration(seconds: 1),
-              ));
-              // Future.delayed(const Duration(seconds: 1), () {
-              //   // Navigator.; //pop dialog
-              // });
-            }
-          },
-          child: Scaffold(
-              backgroundColor: Colors.white,
-              bottomNavigationBar: BottomAppBar(
-                shape: const CircularNotchedRectangle(),
-                color: MyAppColors.white000,
-                elevation: 0,
-                child: SizedBox(
-                  height: 111,
-                  child: SvgPicture.asset(
-                    BackgroundImages.foregroundImagesURL,
-                    fit: BoxFit.fill,
-                    width: 1000,
+    return Material(
+      child: BlocProvider(
+        create: (loginBlocContext) => LoginBloc(
+            authenticationRepository:
+                RepositoryProvider.of<AuthenticationRepository>(context)),
+        child: SafeArea(
+          child: BlocListener<LoginBloc, LoginState>(
+            listener: (context, state) {
+              if (state.status == loginStatus.success) {
+                BlocProvider.of<AuthenticationBloc>(context).add(
+                    const AuthenticationStatusChanged(
+                        AuthenticationStatus.authenticated));
+              }
+              if (state.status == loginStatus.loading) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Đang đăng nhâp...'),
+                  duration: Duration(seconds: 1),
+                ));
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return WaitingIndicator();
+                    });
+              }
+              if (state.status == loginStatus.failure) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text(
+                      'Đăng nhập thất bại! Vui lòng kiểm tra lại tên đăng nhập và mật khẩu!'),
+                  duration: Duration(seconds: 1),
+                ));
+                // Future.delayed(const Duration(seconds: 1), () {
+                //   // Navigator.; //pop dialog
+                // });
+              }
+            },
+            child: Scaffold(
+                backgroundColor: Colors.white,
+                bottomNavigationBar: BottomAppBar(
+                  shape: const CircularNotchedRectangle(),
+                  color: MyAppColors.white000,
+                  elevation: 0,
+                  child: SizedBox(
+                    height: 111,
+                    child: SvgPicture.asset(
+                      BackgroundImages.foregroundImagesURL,
+                      fit: BoxFit.fill,
+                      width: 1000,
+                    ),
                   ),
                 ),
-              ),
 
-              // child: FittedBox(
-              //     fit: BoxFit.fitWidth,
-              //     alignment: Alignment.centerLeft,
-              //     child: MyAppImages.foregroundImage),
-              body: ListView(children: <Widget>[
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    _logo(),
-                    const Text(
-                      'Đăng nhập',
-                      style: TextStyle(
-                          fontSize: 42,
-                          color: Color.fromRGBO(34, 73, 87, 1),
+                // child: FittedBox(
+                //     fit: BoxFit.fitWidth,
+                //     alignment: Alignment.centerLeft,
+                //     child: MyAppImages.foregroundImage),
+                body: ListView(children: <Widget>[
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      _logo(),
+                      const Text(
+                        'Đăng nhập',
+                        style: TextStyle(
+                            fontSize: 42,
+                            color: Color.fromRGBO(34, 73, 87, 1),
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Lexend Deca'),
+                      ),
+                      const SizedBox(
+                        height: 34,
+                      ),
+                      const Text(
+                        'Đăng nhập và bắt đầu quản lý tài chính!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          wordSpacing: 1,
+                          letterSpacing: .6,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Lexend Deca'),
-                    ),
-                    const SizedBox(
-                      height: 34,
-                    ),
-                    const Text(
-                      'Đăng nhập và bắt đầu quản lý tài chính!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        wordSpacing: 1,
-                        letterSpacing: .6,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromRGBO(34, 73, 87, 1),
-                        fontFamily: 'Lexend Deca',
+                          color: Color.fromRGBO(34, 73, 87, 1),
+                          fontFamily: 'Lexend Deca',
+                        ),
                       ),
-                    ),
-                    _buildUserNameTextField(),
-                    _buildPasswordTextField(),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    SizedBox(
-                      width: 300,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                  visualDensity: VisualDensity.compact,
-                                  activeColor: MyAppColors.accent900,
-                                  checkColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
-                                  value: savePassword,
-                                  onChanged: (_) {
-                                    setState(() {
-                                      savePassword = !savePassword;
-                                    });
-                                  }),
-                              const Text('Ghi nhớ mật khẩu',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color.fromRGBO(156, 124, 69, 1.0),
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Lexend Deca',
-                                  ))
-                            ],
-                          ),
-                          TextButton(
-                              onPressed: () {}, child: Text('Quên mật khẩu?'))
-                        ],
+                      _buildUserNameTextField(),
+                      _buildPasswordTextField(),
+                      const SizedBox(
+                        height: 20,
                       ),
-                    ),
+                      SizedBox(
+                        width: 300,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                Checkbox(
+                                    visualDensity: VisualDensity.compact,
+                                    activeColor: MyAppColors.accent900,
+                                    checkColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5)),
+                                    value: savePassword,
+                                    onChanged: (_) {
+                                      setState(() {
+                                        savePassword = !savePassword;
+                                      });
+                                    }),
+                                const Text('Ghi nhớ mật khẩu',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color.fromRGBO(156, 124, 69, 1.0),
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Lexend Deca',
+                                    ))
+                              ],
+                            ),
+                            TextButton(
+                                onPressed: () {}, child: Text('Quên mật khẩu?'))
+                          ],
+                        ),
+                      ),
 
-                    //login button
-                    _buildLoginButton(
-                        userNameController: _userNameController,
-                        passwordController: _passwordController),
-                    // haven't account
-                    const SizedBox(
-                      height: 42,
-                    ),
+                      //login button
+                      _buildLoginButton(
+                          userNameController: _userNameController,
+                          passwordController: _passwordController),
+                      // haven't account
+                      const SizedBox(
+                        height: 42,
+                      ),
 
-                    ChangeLoginMethod(onPressed: () {}, children: []),
+                      ChangeLoginMethod(onPressed: () {}, children: []),
 
-                    // _buildBackground()
-                  ],
-                ),
-              ])),
+                      // _buildBackground()
+                    ],
+                  ),
+                ])),
+          ),
         ),
       ),
     );

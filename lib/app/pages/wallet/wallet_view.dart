@@ -7,6 +7,7 @@ import 'package:personal_financial_management/app/pages/wallet/wallet_profile.da
 import 'package:personal_financial_management/app/routes/app_routes.dart';
 import 'package:personal_financial_management/app/utils/utils.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
+import 'package:personal_financial_management/domain/cubits/wallet_cubit/wallet_cubit.dart';
 import 'package:personal_financial_management/domain/models/wallet.dart';
 
 class WalletView extends StatefulWidget {
@@ -36,11 +37,11 @@ class _WalletViewState extends State<WalletView> {
             child: Text("Không có ví nào"),
           );
         }
-        _walletTypes['bank'] = state.allWallets!['bank'];
-        _walletTypes['credit'] = state.allWallets!['credit'];
-        _walletTypes['stock'] = state.allWallets!['stock'];
-        _walletTypes['e_wallet'] = state.allWallets!['e_wallet'];
-        _walletTypes['cash'] = state.allWallets!['cash'];
+        _walletTypes['bank'] = state.allWallets!['bank'] ?? [];
+        _walletTypes['credit'] = state.allWallets!['credit'] ?? [];
+        _walletTypes['stock'] = state.allWallets!['stock'] ?? [];
+        _walletTypes['e_wallet'] = state.allWallets!['e_wallet'] ?? [];
+        _walletTypes['cash'] = state.allWallets!['cash'] ?? [];
 
         return Scaffold(
             backgroundColor: MyAppColors.white000,
@@ -365,8 +366,16 @@ class _WalletViewState extends State<WalletView> {
   void onWalletTap({required Wallet wallet}) {
     _navigator.push(
       MaterialPageRoute(
-        builder: (context) => WalletProfile(
-          walletInfo: wallet,
+        builder: (context) => BlocProvider(
+          create: (context) => WalletCubit(),
+          child: WalletProfile(
+            walletInfo: wallet,
+            //   ), BlocBuilder<WalletCubit, WalletState>(
+            // builder: (context, state) {
+            //   context.read<WalletCubit>().getWalletTransactions(wallet.id);
+            //   return
+            // },
+          ),
         ),
       ),
     );

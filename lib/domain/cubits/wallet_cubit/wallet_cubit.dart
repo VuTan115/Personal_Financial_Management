@@ -12,8 +12,12 @@ class WalletCubit extends Cubit<WalletState> {
   void getWalletTransactions(
     String walletId,
   ) async {
-    List<t.Transaction> walletTransactions = await _transactionRepository
-        .getWalletTransactions('62850f110946e496d4fba97f');
-    emit(WalletState(walletTransitions: walletTransactions));
+    print("walletId: $walletId");
+    List<t.Transaction> allWalletTransactions =
+        await _transactionRepository.getWalletTransactions(walletId);
+    allWalletTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    if (allWalletTransactions.isNotEmpty) {
+      emit(state.copyWith(walletTransitions: allWalletTransactions));
+    }
   }
 }

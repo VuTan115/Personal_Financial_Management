@@ -57,7 +57,8 @@ class _MyAppState extends State<MyApp> {
                 create: (context) => HomeBloc(
                     transactionRepository: transactionRepository,
                     budgetRepository: budgetRepository,
-                    walletRepository: walletRepository))
+                    walletRepository: walletRepository)
+                  ..add(const HomeSubscriptionRequested()))
           ],
           child: MaterialApp(
             // key: _navigatorKey,

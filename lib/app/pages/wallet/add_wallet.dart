@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
-import 'package:personal_financial_management/app/components/icons/my_icons.dart';
+import 'package:personal_financial_management/app/utils/extentsions.dart';
 
 class AddWallet extends StatelessWidget {
   const AddWallet({Key? key}) : super(key: key);
@@ -23,56 +22,18 @@ class AddWallet extends StatelessWidget {
           child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(width: 1.0, color: MyAppColors.gray400)),
-            ),
-            child: ListTile(
-              onTap: () {},
-              leading: MyAppIcons.bank,
-              title: Text('Tài khoản ngân hàng'),
-            ),
-          ),
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(width: 1.0, color: MyAppColors.gray400)),
-            ),
-            child: ListTile(
-              onTap: () {},
-              leading: MyAppIcons.creditCard,
-              title: Text('Thẻ tín dụng'),
-            ),
-          ),
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(width: 1.0, color: MyAppColors.gray400)),
-            ),
-            child: ListTile(
-              onTap: () {},
-              leading: MyAppIcons.smartPhone,
-              title: Text('Ví điện tử'),
-            ),
-          ),
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(width: 1.0, color: MyAppColors.gray400)),
-            ),
-            child: ListTile(
-              onTap: () {},
-              leading: MyAppIcons.development,
-              title: Text('Chứng khoán'),
-            ),
-          ),
+          _buildListItem(walletName: "Tài khoản ngân hàng", walletType: "bank"),
+          _buildListItem(walletName: "Tài khoản tiền mặt", walletType: "cash"),
+          _buildListItem(walletName: "Thẻ tín dụng", walletType: "credit"),
+          _buildListItem(walletName: "Ví điện tử", walletType: "e_wallet"),
+          _buildListItem(walletName: "Chứng khoán", walletType: "stock"),
         ],
       )),
     );
   }
 
-  Widget _buildListItem() {
+  Widget _buildListItem(
+      {required String walletName, required String walletType}) {
     return Container(
       decoration: const BoxDecoration(
         border:
@@ -80,8 +41,8 @@ class AddWallet extends StatelessWidget {
       ),
       child: ListTile(
         onTap: () {},
-        leading: MyAppIcons.bank,
-        title: Text('Tài khoản ngân hàng'),
+        leading: generateWalletIcon(walletType),
+        title: Text(walletName),
       ),
     );
   }

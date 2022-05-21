@@ -19,7 +19,8 @@ class DataEntryView extends StatefulWidget {
 }
 
 class _DataEntryViewState extends State<DataEntryView> {
-  String _selectedDate = 'Chọn ngày';
+  String _selectedDateTab1 = 'Chọn ngày';
+  String _selectedDateTab2 = 'Chọn ngày';
   String dropdownValue = 'Ăn uống';
   late final Map<String, Widget> moneyCategories;
   late final TextEditingController _amountController;
@@ -83,7 +84,7 @@ class _DataEntryViewState extends State<DataEntryView> {
     late List<Widget> _tabs = [
       Tab(
         child: Text(
-          'NGÂN SÁCH CÁ NHÂN',
+          'CHI TIÊU',
           style: _tabBarTextStyle,
         ),
       ),
@@ -176,7 +177,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                       categories: moneyCategories,
                       parentKey: 'tab1',
                       parentCallback: callBack,
-                      selectorType: 'category',
+                      categoryType: 'category',
                     ),
                     Text(selectedCategory),
                     BlocBuilder<HomeBloc, HomeState>(
@@ -187,7 +188,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                           categories: _mapWalletToCateGories(state.allWallets!),
                           parentCallback: callBack,
                           parentKey: 'tab1',
-                          selectorType: 'wallet',
+                          categoryType: 'wallet',
                         );
                       },
                     ),
@@ -200,7 +201,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                               const BorderRadius.all(Radius.circular(5))),
                       child: InkWell(
                         onTap: () {
-                          _selectDate(context);
+                          _selectDate(context: context, key: "tab1");
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
@@ -212,13 +213,13 @@ class _DataEntryViewState extends State<DataEntryView> {
                                   icon: const Icon(Icons.calendar_today),
                                   tooltip: 'Chọn ngày',
                                   onPressed: () {
-                                    _selectDate(context);
+                                    _selectDate(context: context, key: "tab1");
                                   },
                                 ),
                               ),
                               Container(
                                 margin: EdgeInsets.only(left: 20),
-                                child: Text(_selectedDate,
+                                child: Text(_selectedDateTab1,
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
                                         color: Color.fromARGB(255, 37, 37, 37),
@@ -244,11 +245,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                       primary: MyAppColors.accent800,
                       alignment: Alignment.center),
                   onPressed: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const AddWallet()),
-                    // );
+                    print('tab1 save');
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -313,14 +310,14 @@ class _DataEntryViewState extends State<DataEntryView> {
                       categories: moneyCategories,
                       parentKey: 'tab2',
                       parentCallback: callBack,
-                      selectorType: 'category',
+                      categoryType: 'category',
                     ),
                     Text(selectedCategory),
                     CateGoriesSeletor(
                       categories: inComeWallets,
                       parentKey: 'tab2',
                       parentCallback: callBack,
-                      selectorType: 'income',
+                      categoryType: 'income',
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 40),
@@ -331,7 +328,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                               const BorderRadius.all(Radius.circular(5))),
                       child: InkWell(
                         onTap: () {
-                          _selectDate(context);
+                          _selectDate(context: context, key: 'tab2');
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
@@ -343,15 +340,17 @@ class _DataEntryViewState extends State<DataEntryView> {
                                   icon: const Icon(Icons.calendar_today),
                                   tooltip: 'Chọn ngày',
                                   onPressed: () {
-                                    _selectDate(context);
+                                    _selectDate(context: context, key: 'tab2');
                                   },
                                 ),
                               ),
                               Container(
                                 margin: EdgeInsets.only(left: 20),
-                                child: Text(_selectedDate,
+                                child: Text(_selectedDateTab2,
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(color: Color(0xFF000000))),
+                                    style: const TextStyle(
+                                        color: Color(0xFF000000),
+                                        fontSize: 16)),
                               ),
                             ],
                           ),
@@ -373,11 +372,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                       primary: MyAppColors.accent800,
                       alignment: Alignment.center),
                   onPressed: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //       builder: (context) => const AddWallet()),
-                    // );
+                    print('tab2 save');
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -409,14 +404,23 @@ class _DataEntryViewState extends State<DataEntryView> {
     return int.parse(value);
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(
+      {required BuildContext context, String key = ''}) async {
     final DateTime? day =
         await showMyDatePicker(context: context, dateTime: DateTime.now());
     if (day != null) //if the user has selected a date
     {
-      setState(() {
-        _selectedDate = DateFormat.yMMMMd("vi_VN").format(day);
-      });
+      if (key == 'tab1') {
+        setState(() {
+          _selectedDateTab1 = DateFormat.yMMMMd("vi_VN").format(day);
+          _childState[key]!.update('date', (_) => _selectedDateTab1);
+        });
+      } else {
+        setState(() {
+          _selectedDateTab2 = DateFormat.yMMMMd("vi_VN").format(day);
+          _childState[key]!.update('date', (_) => _selectedDateTab1);
+        });
+      }
     }
   }
 

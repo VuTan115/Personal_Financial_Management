@@ -44,7 +44,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<HomeBloc>(context).add(const HomeSubscriptionRequested());
+    // BlocProvider.of<HomeBloc>(context).add(const HomeSubscriptionRequested());
     return MultiRepositoryProvider(
         providers: [
           RepositoryProvider.value(value: transactionRepository),
@@ -63,9 +63,9 @@ class _HomeViewState extends State<HomeView> {
           child: BlocBuilder<HomeBloc, HomeState>(
             builder: (context, state) {
               if (state.status == HomeStatus.loading) {
-                // return Center(
-                //   child: CircularProgressIndicator(),
-                // );
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }
               return _buildTabBar();
             },
@@ -326,7 +326,7 @@ class _HomeViewState extends State<HomeView> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ListTile(
         onTap: () {},
-        leading: generateIcon(title),
+        leading: generateCategoryIcon(title),
         title: Text(title),
         subtitle: Text(subtitle),
         trailing: Text(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
+import 'package:personal_financial_management/app/components/widgets/ShowCustomDialog.dart';
 
 typedef void ParentCallback(Object val);
 
@@ -11,13 +13,13 @@ class CateGoriesSeletor extends StatefulWidget {
     required this.categories,
     this.parentCallback,
     this.parentKey = 'none',
-    this.selectorType = 'none',
+    this.categoryType = 'none',
     this.itemId = '',
   }) : super(key: key);
-  final Map<String, Widget> categories;
+  late Map<String, Widget> categories;
   final String itemId;
   final String parentKey;
-  final String selectorType;
+  final String categoryType;
   ParentCallback? parentCallback;
   @override
   State<CateGoriesSeletor> createState() => _CateGoriesSeletorState();
@@ -25,16 +27,20 @@ class CateGoriesSeletor extends StatefulWidget {
 
 class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
   late String defaultDropdownValue = 'Chọn danh mục';
-
+  final _formKey = GlobalKey<FormState>();
+  late final newCategory;
   late final dropdownKey;
   @override
   void initState() {
-    // TODO: implement initState
-
     super.initState();
     dropdownKey = GlobalKey();
-    if (widget.categories.isNotEmpty)
+    if (widget.categories.isNotEmpty) {
       defaultDropdownValue = widget.categories.keys.first;
+    }
+    widget.categories['Thêm danh mục'] = Icon(
+      Icons.add,
+      color: MyAppColors.gray800,
+    );
   }
 
   @override
@@ -84,6 +90,29 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
                   },
                   items: widget.categories.keys
                       .map<DropdownMenuItem<String>>((String value) {
+                    if (value == 'Thêm danh mục') {
+                      return DropdownMenuItem<String>(
+                        value: 'none',
+                        child: RadioListTile(
+                          groupValue: defaultDropdownValue,
+                          selected: false,
+                          controlAffinity: ListTileControlAffinity.trailing,
+                          value: 'none',
+                          secondary: const Icon(
+                            Icons.add,
+                            color: MyAppColors.gray800,
+                          ),
+                          title: const Text(
+                            'Thêm danh mục',
+                            textAlign: TextAlign.start,
+                          ),
+                          onChanged: (newValue) {
+                            showNewCategoryDialog();
+                            setState(() {});
+                          },
+                        ),
+                      );
+                    }
                     return DropdownMenuItem<String>(
                       value: value,
                       child: RadioListTile(
@@ -101,7 +130,7 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
                             widget.parentCallback!({
                               'parentKey': widget.parentKey,
                               'value': newValue,
-                              'selectorType': widget.selectorType,
+                              'selectorType': widget.categoryType,
                             });
                           }
                           setState(() {
@@ -124,5 +153,141 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
               ),
             ),
     );
+  }
+
+  void showNewCategoryDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          TextEditingController _amountController = TextEditingController();
+          return AlertDialog(
+            content: Stack(
+              clipBehavior: Clip.antiAlias,
+              children: <Widget>[
+                Positioned(
+                  right: -40.0,
+                  top: -40.0,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                          color: MyAppColors.accent700,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              width: 1, color: MyAppColors.accent800)),
+                      child: Icon(
+                        Icons.close,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextFormField(
+                          controller: _amountController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: const OutlineInputBorder(),
+                            focusColor: MyAppColors.accent800,
+                            focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: MyAppColors.accent800, width: 1)),
+                            labelText: 'Loại mới',
+                            hintText: 'Nhập tên loại mới',
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 26),
+                              child: MyAppIcons.vnd,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: Center(
+                              child: Padding(
+                            padding: const EdgeInsets.all(0.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  elevation: 4,
+                                  primary: MyAppColors.accent800,
+                                  alignment: Alignment.center),
+                              onPressed: () {
+                                // if _amountController.text is exist in categories list then not add new dropdown item else add new dropdown item
+                                if (_amountController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content:
+                                          Text('Tên loại không được để trống'),
+                                      backgroundColor: MyAppColors.accent800,
+                                    ),
+                                  );
+                                  Navigator.of(context).pop();
+
+                                  return;
+                                }
+                                if (widget.categories
+                                    .containsKey(_amountController.text)) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Tên loại đã tồn tại, vui lòng chọn tên khác'),
+                                      backgroundColor: MyAppColors.accent800,
+                                    ),
+                                  );
+                                } else {
+                                  setState(() {
+                                    // add new category to categories list at first position of widget.categories
+                                    Map<String, Widget> newMap = {
+                                      _amountController.text:
+                                          MyAppIcons.savingsBag
+                                    };
+                                    newMap.addAll(widget.categories);
+                                    widget.categories = newMap;
+                                    defaultDropdownValue =
+                                        _amountController.text;
+                                    Navigator.pop(dropdownKey.currentContext!);
+                                  });
+                                }
+
+                                Navigator.of(context).pop();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Text(
+                                      'THÊM',
+                                      style: TextStyle(
+                                        color: MyAppColors.white000,
+                                        fontSize: 20,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
   }
 }

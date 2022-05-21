@@ -172,7 +172,7 @@ class _MainPageState extends State<MainPage>
           padding: const EdgeInsets.only(left: 5),
           child: Text(
             _currentMainView.title.toUpperCase(),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               color: MyAppColors.gray700,
               fontWeight: FontWeight.bold,
