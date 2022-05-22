@@ -3,6 +3,8 @@ import Transaction from '../models/Transaction.js'
 import Category from '../models/Category.js'
 import Wallet from '../models/Wallet.js'
 import getWeekDay from '../helpers/getWeekDay.js'
+import getDate from '../helpers/getDate.js'
+import getDateForDart from '../helpers/getDateForDart.js'
 
 const { ObjectId } = mongoose.Types
 
@@ -119,6 +121,10 @@ const getFilteredTransaction = async (req, res) => {
         },
       ])
     } else if (filter === 'TransactionFilter.day') {
+      const startDay = new Date(reqTimestamp)
+      const endDay = new Date(reqTimestamp)
+      startDay.setHours(0, 0, 0, 0)
+      endDay.setHours(23, 59, 59, 999)
       transactions = await Transaction.aggregate([
         {
           $addFields: {
@@ -135,7 +141,12 @@ const getFilteredTransaction = async (req, res) => {
             $and: [
               {
                 $expr: {
-                  $eq: ['$creationDate', reqTimestamp.toISOString().split('T')[0]],
+                  $gte: ['$created_at', startDay],
+                },
+              },
+              {
+                $expr: {
+                  $lte: ['$created_at', endDay],
                 },
               },
               {
@@ -202,8 +213,10 @@ const getFilteredTransaction = async (req, res) => {
       ])
     }
 
-    console.log(reqTimestamp.toISOString().split('T')[0])
-    return res.status(200).json(transactions)
+    return res.status(200).json(transactions.map((element) => ({
+      ...element,
+      created_at: getDateForDart(element.created_at)
+    })))
   } catch (error) {
     console.log(error)
     return res.status(500).json('server error')

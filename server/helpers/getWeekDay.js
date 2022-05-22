@@ -3,6 +3,7 @@ function getMonday(timestamp) {
   const day = d.getDay()
   const diff = d.getDate() - day + (day === 0 ? -6 : 1) // adjust when day is sunday
   const result = new Date(d.setDate(diff))
+  result.setTime(result.getTime() + (7 * 60 * 60 * 1000))
   result.setHours(0, 0, 0, 0)
   return result
 }
