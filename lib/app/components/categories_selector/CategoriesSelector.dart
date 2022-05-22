@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/components/widgets/ShowCustomDialog.dart';
+import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
+import 'package:personal_financial_management/domain/cubits/category/category_cubit.dart';
 
 typedef void ParentCallback(Object val);
 
@@ -27,6 +30,8 @@ class CateGoriesSeletor extends StatefulWidget {
 
 class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
   late String defaultDropdownValue = 'Chọn danh mục';
+  TextEditingController _newCategoryName = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   late final dropdownKey;
   @override
@@ -36,14 +41,17 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
     if (widget.categories.isNotEmpty) {
       defaultDropdownValue = widget.categories.keys.first;
     }
-    widget.categories['Thêm danh mục'] = Icon(
-      Icons.add,
-      color: MyAppColors.gray800,
-    );
+    if (widget.categoryType == 'category' || widget.categoryType == 'income') {
+      widget.categories['Thêm danh mục'] = Icon(
+        Icons.add,
+        color: MyAppColors.gray800,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    print(widget.categoryType);
     return Container(
       margin: const EdgeInsets.only(top: 40),
       decoration: BoxDecoration(
@@ -106,8 +114,7 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
                             textAlign: TextAlign.start,
                           ),
                           onChanged: (newValue) {
-                            showNewCategoryDialog();
-                            setState(() {});
+                            showNewCategoryDialog(context);
                           },
                         ),
                       );
@@ -152,140 +159,168 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
               ),
             ),
     );
+    ;
   }
 
-  void showNewCategoryDialog() {
+  void showNewCategoryDialog(BuildContext categoryContext) {
     showDialog(
         context: context,
-        builder: (BuildContext context) {
-          TextEditingController _amountController = TextEditingController();
-          return AlertDialog(
-            content: Stack(
-              clipBehavior: Clip.antiAlias,
-              children: <Widget>[
-                Positioned(
-                  right: -40.0,
-                  top: -40.0,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      height: 30,
-                      width: 30,
-                      decoration: BoxDecoration(
-                          color: MyAppColors.accent700,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              width: 1, color: MyAppColors.accent800)),
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        TextFormField(
-                          controller: _amountController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: const OutlineInputBorder(),
-                            focusColor: MyAppColors.accent800,
-                            focusedBorder: const OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: MyAppColors.accent800, width: 1)),
-                            labelText: 'Loại mới',
-                            hintText: 'Nhập tên loại mới',
-                            prefixIcon: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 26),
-                              child: MyAppIcons.vnd,
+        builder: (categoryContext) {
+          return BlocProvider(
+            create: (context) => CategoryCubit(),
+            child: BlocBuilder<CategoryCubit, CategoryState>(
+              builder: (context, state) {
+                if (state is CategoryCreating) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return AlertDialog(
+                  content: Stack(
+                    clipBehavior: Clip.antiAlias,
+                    children: <Widget>[
+                      Positioned(
+                        right: -40.0,
+                        top: -40.0,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                            height: 30,
+                            width: 30,
+                            decoration: BoxDecoration(
+                                color: MyAppColors.accent700,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    width: 1, color: MyAppColors.accent800)),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
                             ),
                           ),
                         ),
-                        Padding(
+                      ),
+                      Form(
+                        key: _formKey,
+                        child: Padding(
                           padding: const EdgeInsets.only(top: 16.0),
-                          child: Center(
-                              child: Padding(
-                            padding: const EdgeInsets.all(0.0),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  elevation: 4,
-                                  primary: MyAppColors.accent800,
-                                  alignment: Alignment.center),
-                              onPressed: () {
-                                // if _amountController.text is exist in categories list then not add new dropdown item else add new dropdown item
-                                if (_amountController.text.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content:
-                                          Text('Tên loại không được để trống'),
-                                      backgroundColor: MyAppColors.accent800,
-                                    ),
-                                  );
-                                  Navigator.of(context).pop();
-
-                                  return;
-                                }
-                                if (widget.categories
-                                    .containsKey(_amountController.text)) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Tên loại đã tồn tại, vui lòng chọn tên khác'),
-                                      backgroundColor: MyAppColors.accent800,
-                                    ),
-                                  );
-                                } else {
-                                  setState(() {
-                                    // add new category to categories list at first position of widget.categories
-                                    Map<String, Widget> newMap = {
-                                      _amountController.text: MyAppIcons.person
-                                    };
-                                    newMap.addAll(widget.categories);
-                                    widget.categories = newMap;
-                                    defaultDropdownValue =
-                                        _amountController.text;
-                                    Navigator.pop(dropdownKey.currentContext!);
-                                  });
-                                }
-
-                                Navigator.of(context).pop();
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Text(
-                                      'THÊM',
-                                      style: TextStyle(
-                                        color: MyAppColors.white000,
-                                        fontSize: 20,
-                                      ),
-                                    )
-                                  ],
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              TextFormField(
+                                controller: _newCategoryName,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: const OutlineInputBorder(),
+                                  focusColor: MyAppColors.accent800,
+                                  focusedBorder: const OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: MyAppColors.accent800,
+                                          width: 1)),
+                                  labelText: 'Loại mới',
+                                  hintText: 'Nhập tên loại mới',
+                                  prefixIcon: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 26),
+                                    child: MyAppIcons.vnd,
+                                  ),
                                 ),
                               ),
-                            ),
-                          )),
-                        )
-                      ],
-                    ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: Center(
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(0.0),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        elevation: 4,
+                                        primary: MyAppColors.accent800,
+                                        alignment: Alignment.center),
+                                    onPressed: () {
+                                      // if _amountController.text is exist in categories list then not add new dropdown item else add new dropdown item
+                                      if (_newCategoryName.text.isEmpty) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Tên loại không được để trống'),
+                                            backgroundColor:
+                                                MyAppColors.accent800,
+                                          ),
+                                        );
+                                        Navigator.of(context).pop();
+
+                                        return;
+                                      }
+                                      if (widget.categories
+                                          .containsKey(_newCategoryName.text)) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Tên loại đã tồn tại, vui lòng chọn tên khác'),
+                                            backgroundColor:
+                                                MyAppColors.accent800,
+                                          ),
+                                        );
+                                      } else {
+                                        setState(() {
+                                          // add new category to categories list at first position of widget.categories
+                                          Map<String, Widget> newMap = {
+                                            _newCategoryName.text:
+                                                MyAppIcons.person
+                                          };
+                                          newMap.addAll(widget.categories);
+                                          widget.categories = newMap;
+                                          defaultDropdownValue =
+                                              _newCategoryName.text;
+                                          Navigator.pop(
+                                              dropdownKey.currentContext!);
+                                        });
+                                      }
+                                      BlocProvider.of<CategoryCubit>(context)
+                                          .createNewCategory(
+                                              categoryName:
+                                                  _newCategoryName.text,
+                                              isOutput:
+                                                  widget.parentKey == 'tab1');
+
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: const [
+                                          Text(
+                                            'THÊM',
+                                            style: TextStyle(
+                                              color: MyAppColors.white000,
+                                              fontSize: 20,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
           );
         });
   }
+
+  void onSaveCategoryTab(BuildContext context) {}
 }

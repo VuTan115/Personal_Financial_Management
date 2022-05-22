@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
 import 'package:personal_financial_management/app/components/date_picker/rounded_date_picker.dart';
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/utils.dart';
+import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
+import 'package:personal_financial_management/domain/cubits/date_change/date_change_cubit.dart';
 
 class MyDatePicker extends StatefulWidget {
   MyDatePicker({Key? key, required this.dateTime}) : super(key: key);
@@ -109,28 +112,48 @@ class _MyDatePickerState extends State<MyDatePicker> {
   }
 
   Widget _buildMonthChanger() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-            icon: MyAppIcons.chevronLeftOn,
-            onPressed: () {
-              // change month of today
-              setState(() {
-                _today = _today.subtract(
-                    Duration(days: getDaysInMonth(_today.year, _today.month)));
-              });
-            }),
-        IconButton(
-          icon: MyAppIcons.chevronRightOn,
-          onPressed: () {
-            setState(() {
-              _today = _today.add(
-                  Duration(days: getDaysInMonth(_today.year, _today.month)));
-            });
-          },
-        ),
-      ],
+    return BlocProvider(
+      create: (context) => DateChangeCubit(),
+      child: BlocBuilder<DateChangeCubit, DateChangeState>(
+        builder: (context, state) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                  icon: MyAppIcons.chevronLeftOn,
+                  onPressed: () {
+                    // change month of today
+                    setState(() {
+                      _today = _today.subtract(Duration(
+                          days: getDaysInMonth(_today.year, _today.month)));
+                    });
+                    BlocProvider.of<DateChangeCubit>(context)
+                        .dateChange(newDate: _today.toString());
+
+                    BlocProvider.of<HomeBloc>(context).add(
+                      HomeSubscriptionRequestedWithFilter(
+                          date: _today, filter: TransactionFilter.month),
+                    );
+                  }),
+              IconButton(
+                icon: MyAppIcons.chevronRightOn,
+                onPressed: () {
+                  setState(() {
+                    _today = _today.add(Duration(
+                        days: getDaysInMonth(_today.year, _today.month)));
+                  });
+                  BlocProvider.of<DateChangeCubit>(context)
+                      .dateChange(newDate: _today.toString());
+                  BlocProvider.of<HomeBloc>(context).add(
+                    HomeSubscriptionRequestedWithFilter(
+                        date: _today, filter: TransactionFilter.month),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

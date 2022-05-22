@@ -92,8 +92,10 @@ Future<DateTime?> showMyDatePicker(
         heightYearRow: 100,
         backgroundPicker: MyAppColors.white000,
       ));
+
   if (newDateTime != null) {
-    return newDateTime.add(Duration(hours: 12, minutes: 59, seconds: 59));
+    return newDateTime.add(Duration(hours: 1));
   }
+
   return DateTime.now();
 }

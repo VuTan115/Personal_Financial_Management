@@ -7,9 +7,14 @@ import 'package:personal_financial_management/app/components/colors/my_colors.da
 import 'package:personal_financial_management/app/components/date_picker/rounded_date_picker.dart';
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
+import 'package:personal_financial_management/app/utils/global_key.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
+import 'package:personal_financial_management/domain/cubits/category/category_cubit.dart';
 import 'package:personal_financial_management/domain/cubits/transaction/transaction_cubit_cubit.dart';
 import 'package:personal_financial_management/domain/models/transaction.dart';
+import 'package:personal_financial_management/domain/models/wallet.dart';
+import 'package:personal_financial_management/domain/repositories/budget_repo.dart';
+import 'package:personal_financial_management/domain/repositories/repositories.dart';
 
 class DataEntryView extends StatefulWidget {
   const DataEntryView({Key? key}) : super(key: key);
@@ -20,6 +25,8 @@ class DataEntryView extends StatefulWidget {
 
 class _DataEntryViewState extends State<DataEntryView>
     with AutomaticKeepAliveClientMixin {
+  PageController get _pageController => GlobalKeys.pageController;
+
   String _selectedDateTab1 = 'Chọn ngày';
   String _selectedDateTab2 = 'Chọn ngày';
   String dropdownValue = 'Ăn uống';
@@ -32,11 +39,20 @@ class _DataEntryViewState extends State<DataEntryView>
   late Map<String, Map<String, String>> _childState;
   late Map<String, dynamic>? allWalletInfor;
   late List<Transaction>? allTransactionInfor;
+  late WalletRepository _walletRepository;
+  late final TransactionRepository transactionRepository;
+  late final BudgetRepository budgetRepository;
+  late final WalletRepository walletRepository;
+  late List walletList = [];
   @override
   void initState() {
     super.initState();
     _amountControllerTab1 = TextEditingController();
     _amountControllerTab2 = TextEditingController();
+    _walletRepository = WalletRepository();
+    transactionRepository = TransactionRepository();
+    budgetRepository = BudgetRepository();
+    walletRepository = WalletRepository();
     moneyCategories = {
       "Ăn uống": MyAppIcons.lunch,
       "Giáo dục": MyAppIcons.book,
@@ -69,8 +85,8 @@ class _DataEntryViewState extends State<DataEntryView>
       },
       'tab2': {
         'amount': '',
-        'category': '',
         'income': '',
+        'wallet': '',
         'date': '',
       },
     };
@@ -82,8 +98,14 @@ class _DataEntryViewState extends State<DataEntryView>
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, state) {
         // state.allWallets!.values.forEach((element) {
-        //   print(element);
+        //   walletList.add(element.sublist(0, element.length));
         // });
+        // walletList = walletList.expand((element) => element).toList();
+        // (walletList.forEach((e) {
+        //   // wallets.update(e.name, (value) => generateWalletIcon(e.type),
+        //   //     ifAbsent: () => generateWalletIcon(e.type));
+        // }));
+        // print(walletList);
 
         return _buildTabBar();
       },
@@ -166,9 +188,9 @@ class _DataEntryViewState extends State<DataEntryView>
                   children: [
                     TextField(
                       onChanged: (value) {
-                        setState(() {
-                          _childState['tab1']!['amount'] = value;
-                        });
+                        // setState(() {
+                        _childState['tab1']!['amount'] = value;
+                        // });
                       },
                       controller: _amountControllerTab1,
                       keyboardType: TextInputType.number,
@@ -207,12 +229,6 @@ class _DataEntryViewState extends State<DataEntryView>
                         // set default wallet and category
                         allWalletInfor = state.allWallets;
                         allTransactionInfor = state.allTransactions;
-                        // _childState['tab1']!['wallet'] =
-                        //     allWalletInfor!.values.first[0].name;
-                        // _childState['tab2']!['income'] =
-                        //     inComeWallets.keys.first;
-                        // _childState['tab1']!['category'] = 'Ăn uống';
-                        // _childState['tab2']!['category'] = 'Ăn uống';
 
                         return CateGoriesSeletor(
                           categories: _mapWalletToCateGories(state.allWallets!),
@@ -337,17 +353,27 @@ class _DataEntryViewState extends State<DataEntryView>
                       ),
                     ),
                     CateGoriesSeletor(
-                      categories: moneyCategories,
-                      parentKey: 'tab2',
-                      parentCallback: callBack,
-                      categoryType: 'category',
-                    ),
-                    Text(selectedCategory),
-                    CateGoriesSeletor(
                       categories: inComeWallets,
                       parentKey: 'tab2',
                       parentCallback: callBack,
                       categoryType: 'income',
+                    ),
+                    Text(selectedCategory),
+                    BlocBuilder<HomeBloc, HomeState>(
+                      builder: (context, state) {
+                        if (state.allWallets!.isEmpty)
+                          return CateGoriesSeletor(categories: {});
+
+                        // set default wallet and category
+                        allWalletInfor = state.allWallets;
+                        allTransactionInfor = state.allTransactions;
+                        return CateGoriesSeletor(
+                          categories: _mapWalletToCateGories(state.allWallets!),
+                          parentCallback: callBack,
+                          parentKey: 'tab2',
+                          categoryType: 'wallet',
+                        );
+                      },
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 40),
@@ -453,7 +479,6 @@ class _DataEntryViewState extends State<DataEntryView>
   }
 
   void callBack(childState) {
-    print('childState: $childState');
     switch (childState['parentKey']) {
       case 'tab1':
         setState(() {
@@ -468,42 +493,31 @@ class _DataEntryViewState extends State<DataEntryView>
         });
         break;
     }
-    print('_childState: $_childState');
   }
 
   Map<String, Widget> _mapWalletToCateGories(Map<String, dynamic> wallets) {
-    List data = (wallets.values.map((e) {
-      switch (e[0].type) {
-        case 'bank':
-          return "${e[0]!.name}:MyAppIcon.bank";
-        case 'cash':
-          return "${e[0]!.name}:MyAppIcon.banknote";
-        case 'credit':
-          return "${e[0]!.name}:MyAppIcon.creditCard";
-        case 'e_wallet':
-          return "${e[0]!.name}:MyAppIcon.wallet";
-        case 'stock':
-          return "${e[0]!.name}:MyAppIcon.development";
-      }
-    })).toList();
-    // convert to map<string, MyAppIcon widget>
-    Map<String, Widget> result = Map<String, Widget>.fromIterable(data,
-        key: (dynamic item) => item.split(':')[0],
-        value: (dynamic item) {
-          switch (item.split(':')[1]) {
-            case 'MyAppIcon.bank':
-              return MyAppIcons.bank;
-            case 'MyAppIcon.banknote':
-              return MyAppIcons.banknote;
-            case 'MyAppIcon.creditCard':
-              return MyAppIcons.creditCard;
-            case 'MyAppIcon.wallet':
-              return MyAppIcons.wallet;
-            case 'MyAppIcon.development':
-              return MyAppIcons.development;
-          }
-          return MyAppIcons.bank;
-        });
+    final data = wallets.values
+        .map((e) => e.map((item) => "${item.name}:MyAppIcon.bank"));
+    // convert test data to list
+    final result = (Map<String, Widget>.fromIterable(
+      data.toList().expand((element) => element).toList(),
+      key: (item) => item.split(':')[0],
+      value: (item) {
+        switch (item.split(':')[1]) {
+          case 'MyAppIcon.bank':
+            return MyAppIcons.bank;
+          case 'MyAppIcon.banknote':
+            return MyAppIcons.banknote;
+          case 'MyAppIcon.creditCard':
+            return MyAppIcons.creditCard;
+          case 'MyAppIcon.wallet':
+            return MyAppIcons.wallet;
+          case 'MyAppIcon.development':
+            return MyAppIcons.development;
+        }
+        return MyAppIcons.bank;
+      },
+    ));
 
     return result;
   }
@@ -522,6 +536,8 @@ class _DataEntryViewState extends State<DataEntryView>
           created_at: DateTime.parse("${_childState['tab1']!['date']}"),
           is_output: true,
         );
+    BlocProvider.of<HomeBloc>(context).add(const HomeSubscriptionRequested());
+    _pageController.jumpTo(1);
   }
 
   void onTab2Tap() {
@@ -539,7 +555,10 @@ class _DataEntryViewState extends State<DataEntryView>
           created_at: DateTime.parse("${_childState['tab2']!['date']}"),
           is_output: false,
         );
-    ;
+    BlocProvider.of<HomeBloc>(context).add(const HomeSubscriptionRequested());
+
+    // Navigator.pop(context);
+    _pageController.jumpTo(1);
   }
 
   void showWarning() {
@@ -562,5 +581,5 @@ class _DataEntryViewState extends State<DataEntryView>
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 }

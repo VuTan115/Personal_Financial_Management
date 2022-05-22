@@ -58,7 +58,7 @@ class TransactionRepository {
     String wallet,
     DateTime created_at,
   ) async {
-    print("createTransaction${category}");
+    print("createTransaction ${category}");
     String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
     var data = {
       "amount": amount,
@@ -73,7 +73,6 @@ class TransactionRepository {
         data: jsonEncode(data));
     Map<String, dynamic>? json = res.data;
 
-    print(json);
     return t.Transaction.fromJson(json!);
   }
 }

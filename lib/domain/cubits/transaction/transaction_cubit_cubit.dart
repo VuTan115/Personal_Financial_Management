@@ -11,7 +11,6 @@ part 'transaction_cubit_state.dart';
 class TransactionCubit extends Cubit<TransactionCubitState> {
   TransactionCubit() : super(TransactionCubitInitial());
 
-  // final HomeBloc homeBloc;
   // late final StreamSubscription homeBlocSubscription;
 
   void createNewTransaction({
@@ -29,6 +28,5 @@ class TransactionCubit extends Cubit<TransactionCubitState> {
       wallet,
       created_at,
     );
-    print("createNewTransaction");
   }
 }

@@ -76,3 +76,5 @@ class HomeStateChangeDate extends Equatable {
   @override
   List<Object?> get props => [status, transactions, filter];
 }
+
+

@@ -33,15 +33,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(status: () => HomeStatus.loading));
     List<t.Transaction> transactions = await _transactionRepository
         .getTransactions(DateTime.now(), state.filter);
+
     List<t.Transaction> todayTransactions = await _transactionRepository
         .getTransactions(DateTime.now(), TransactionFilter.day);
+
     List<t.Transaction> weekTransactions = await _transactionRepository
         .getTransactions(DateTime.now(), TransactionFilter.week);
+
     List<t.Transaction> monthTransactions = await _transactionRepository
         .getTransactions(DateTime.now(), TransactionFilter.month);
+
     todayTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     weekTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     monthTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
     Map<String, dynamic> allWallets = await _walletRepository.getAllWallets();
     List<t.Transaction> walletTransactions = await _transactionRepository
         .getWalletTransactions('62850f110946e496d4fba97f');

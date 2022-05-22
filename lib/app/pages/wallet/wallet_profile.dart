@@ -22,7 +22,6 @@ class WalletProfile extends StatefulWidget {
 class _WalletProfileState extends State<WalletProfile> {
   @override
   Widget build(BuildContext context) {
-    print(widget.walletInfo);
     context.read<WalletCubit>().getWalletTransactions(widget.walletInfo.id);
     return Scaffold(
       backgroundColor: Colors.white,
