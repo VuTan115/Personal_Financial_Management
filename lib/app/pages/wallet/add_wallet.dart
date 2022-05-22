@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
 import 'package:personal_financial_management/app/pages/wallet/wallet_info_input.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
+import 'package:personal_financial_management/domain/cubits/wallet/wallet_cubit.dart';
 
 class AddWallet extends StatefulWidget {
   const AddWallet({Key? key}) : super(key: key);
@@ -50,7 +52,7 @@ class _AddWalletState extends State<AddWallet> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WalletInfoInput(
+              builder: (_) => WalletInfoInput(
                 name: walletName,
                 type: walletType,
               ),

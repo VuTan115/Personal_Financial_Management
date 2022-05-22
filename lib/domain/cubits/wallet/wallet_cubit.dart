@@ -23,12 +23,12 @@ class WalletCubit extends Cubit<WalletState> {
     }
   }
 
-  void createNewWallet(
-    num amount,
-    String name,
-    String type,
-    String description,
-  ) async {
+  void createNewWallet({
+    required num amount,
+    required String name,
+    required String type,
+    required String description,
+  }) async {
     final Wallet newWallet = await WalletRepository().createWallet(
       amount,
       name,
