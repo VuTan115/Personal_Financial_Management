@@ -4,10 +4,10 @@ import 'package:personal_financial_management/app/components/colors/my_colors.da
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/pages/wallet/add_wallet.dart';
 import 'package:personal_financial_management/app/pages/wallet/wallet_profile.dart';
-import 'package:personal_financial_management/app/routes/app_routes.dart';
 import 'package:personal_financial_management/app/utils/utils.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
-import 'package:personal_financial_management/domain/cubits/wallet_cubit/wallet_cubit.dart';
+import 'package:personal_financial_management/domain/cubits/wallet/wallet_cubit.dart';
+
 import 'package:personal_financial_management/domain/models/wallet.dart';
 
 class WalletView extends StatefulWidget {

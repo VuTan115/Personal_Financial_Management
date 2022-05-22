@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
+import 'package:personal_financial_management/app/pages/wallet/wallet_info_input.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
 
-class AddWallet extends StatelessWidget {
+class AddWallet extends StatefulWidget {
   const AddWallet({Key? key}) : super(key: key);
 
+  @override
+  State<AddWallet> createState() => _AddWalletState();
+}
+
+class _AddWalletState extends State<AddWallet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +46,17 @@ class AddWallet extends StatelessWidget {
             Border(bottom: BorderSide(width: 1.0, color: MyAppColors.gray400)),
       ),
       child: ListTile(
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WalletInfoInput(
+                name: walletName,
+                type: walletType,
+              ),
+            ),
+          );
+        },
         leading: generateWalletIcon(walletType),
         title: Text(walletName),
       ),

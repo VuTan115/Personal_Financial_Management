@@ -28,7 +28,6 @@ class CateGoriesSeletor extends StatefulWidget {
 class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
   late String defaultDropdownValue = 'Chọn danh mục';
   final _formKey = GlobalKey<FormState>();
-  late final newCategory;
   late final dropdownKey;
   @override
   void initState() {

@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
 import 'package:personal_financial_management/domain/models/transaction.dart'
     as t;
+import 'package:personal_financial_management/domain/models/wallet.dart';
+import 'package:personal_financial_management/domain/repositories/repositories.dart';
 import 'package:personal_financial_management/domain/repositories/transaction_repo.dart';
 part 'wallet_state.dart';
 
@@ -19,5 +21,20 @@ class WalletCubit extends Cubit<WalletState> {
     if (allWalletTransactions.isNotEmpty) {
       emit(state.copyWith(walletTransitions: allWalletTransactions));
     }
+  }
+
+  void createNewWallet(
+    num amount,
+    String name,
+    String type,
+    String description,
+  ) async {
+    final Wallet newWallet = await WalletRepository().createWallet(
+      amount,
+      name,
+      type,
+      description,
+    );
+    print(newWallet);
   }
 }

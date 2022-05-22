@@ -7,7 +7,8 @@ import 'package:personal_financial_management/app/components/images/my_images.da
 import 'package:personal_financial_management/app/components/widgets/ListViewTitle.dart';
 import 'package:personal_financial_management/app/utils/assets.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
-import 'package:personal_financial_management/domain/cubits/wallet_cubit/wallet_cubit.dart';
+import 'package:personal_financial_management/domain/cubits/wallet/wallet_cubit.dart';
+
 import 'package:personal_financial_management/domain/models/wallet.dart';
 
 class WalletProfile extends StatefulWidget {

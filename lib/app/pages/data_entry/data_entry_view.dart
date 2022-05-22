@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:personal_financial_management/app/components/categories_selector/CategoriesSelector.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
-import 'package:personal_financial_management/app/components/date_picker/date_controller.dart';
 import 'package:personal_financial_management/app/components/date_picker/rounded_date_picker.dart';
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
-import 'package:personal_financial_management/domain/models/wallet.dart';
-import 'package:intl/intl.dart';
+import 'package:personal_financial_management/domain/cubits/transaction/transaction_cubit_cubit.dart';
+import 'package:personal_financial_management/domain/models/transaction.dart';
 
 class DataEntryView extends StatefulWidget {
   const DataEntryView({Key? key}) : super(key: key);
@@ -18,21 +18,25 @@ class DataEntryView extends StatefulWidget {
   State<DataEntryView> createState() => _DataEntryViewState();
 }
 
-class _DataEntryViewState extends State<DataEntryView> {
+class _DataEntryViewState extends State<DataEntryView>
+    with AutomaticKeepAliveClientMixin {
   String _selectedDateTab1 = 'Chọn ngày';
   String _selectedDateTab2 = 'Chọn ngày';
   String dropdownValue = 'Ăn uống';
   late final Map<String, Widget> moneyCategories;
-  late final TextEditingController _amountController;
+  late final TextEditingController _amountControllerTab1;
+  late final TextEditingController _amountControllerTab2;
   late String selectedCategory;
   late final Map<String, Widget> wallets;
   late final Map<String, Widget> inComeWallets;
   late Map<String, Map<String, String>> _childState;
+  late Map<String, dynamic>? allWalletInfor;
+  late List<Transaction>? allTransactionInfor;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _amountController = TextEditingController();
+    _amountControllerTab1 = TextEditingController();
+    _amountControllerTab2 = TextEditingController();
     moneyCategories = {
       "Ăn uống": MyAppIcons.lunch,
       "Giáo dục": MyAppIcons.book,
@@ -41,6 +45,7 @@ class _DataEntryViewState extends State<DataEntryView> {
       "Quần áo - Làm đẹp": MyAppIcons.clothes,
       "Nhà ở": MyAppIcons.key,
       "Giải trí": MyAppIcons.music,
+      "Di chuyển": Icon(Icons.agriculture),
     };
     wallets = {
       "Ví điện tử": MyAppIcons.wallet,
@@ -73,6 +78,8 @@ class _DataEntryViewState extends State<DataEntryView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    print('build');
     return _buildTabBar();
   }
 
@@ -151,7 +158,12 @@ class _DataEntryViewState extends State<DataEntryView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TextField(
-                      controller: _amountController,
+                      onChanged: (value) {
+                        setState(() {
+                          _childState['tab1']!['amount'] = value;
+                        });
+                      },
+                      controller: _amountControllerTab1,
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
@@ -184,6 +196,17 @@ class _DataEntryViewState extends State<DataEntryView> {
                       builder: (context, state) {
                         if (state.allWallets!.isEmpty)
                           return CateGoriesSeletor(categories: {});
+
+                        // set default wallet and category
+                        allWalletInfor = state.allWallets;
+                        allTransactionInfor = state.allTransactions;
+                        _childState['tab1']!['wallet'] =
+                            allWalletInfor!.keys.first;
+                        _childState['tab2']!['income'] =
+                            allWalletInfor!.keys.first;
+                        _childState['tab1']!['category'] = 'Ăn uống';
+                        _childState['tab2']!['category'] = 'Ăn uống';
+
                         return CateGoriesSeletor(
                           categories: _mapWalletToCateGories(state.allWallets!),
                           parentCallback: callBack,
@@ -244,9 +267,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                       elevation: 4,
                       primary: MyAppColors.accent800,
                       alignment: Alignment.center),
-                  onPressed: () {
-                    print('tab1 save');
-                  },
+                  onPressed: onTab1Tap,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -284,7 +305,9 @@ class _DataEntryViewState extends State<DataEntryView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TextField(
-                      controller: _amountController,
+                      onChanged: (value) =>
+                          _childState['tab2']!['amount'] = value,
+                      controller: _amountControllerTab2,
                       keyboardType: TextInputType.number,
                       inputFormatters: <TextInputFormatter>[
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
@@ -371,9 +394,7 @@ class _DataEntryViewState extends State<DataEntryView> {
                       elevation: 4,
                       primary: MyAppColors.accent800,
                       alignment: Alignment.center),
-                  onPressed: () {
-                    print('tab2 save');
-                  },
+                  onPressed: onTab2Tap,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -413,12 +434,12 @@ class _DataEntryViewState extends State<DataEntryView> {
       if (key == 'tab1') {
         setState(() {
           _selectedDateTab1 = DateFormat.yMMMMd("vi_VN").format(day);
-          _childState[key]!.update('date', (_) => _selectedDateTab1);
+          _childState[key]!.update('date', (_) => day.toString());
         });
       } else {
         setState(() {
           _selectedDateTab2 = DateFormat.yMMMMd("vi_VN").format(day);
-          _childState[key]!.update('date', (_) => _selectedDateTab1);
+          _childState[key]!.update('date', (_) => day.toString());
         });
       }
     }
@@ -474,4 +495,64 @@ class _DataEntryViewState extends State<DataEntryView> {
 
     return result;
   }
+
+  void onTab1Tap() {
+    if (_childState['tab1']!.containsValue('')) {
+      showWarning();
+      return;
+    }
+    final Map<String, String> data = _childState['tab1']!;
+    data['amount'] = _amountControllerTab1.text;
+    final currentWallet = allWalletInfor!.values
+        .firstWhere((element) => (element[0].name == data['wallet']));
+    _childState['tab1']!.putIfAbsent('walletId', () => currentWallet[0].id);
+
+    context.read<TransactionCubit>().createNewTransaction(
+          amount: int.parse("${_childState['tab1']!['amount']}"),
+          category_id: ("${_childState['tab1']!['category']}"),
+          wallet_id: "${_childState['tab1']!['walletId']}",
+          is_output: true,
+        );
+    print(_childState['tab1']);
+  }
+
+  void onTab2Tap() {
+    print(_childState['tab2']);
+    if (_childState['tab2']!.containsValue('')) {
+      showWarning();
+      return;
+    }
+    final Map<String, String> data = _childState['tab2']!;
+    data['amount'] = _amountControllerTab2.text;
+    final Transaction currentTransaction = allTransactionInfor!.firstWhere(
+      (element) => element.categoryName == data['income'],
+    );
+    _childState['tab2']!
+        .putIfAbsent('incomeId', () => "${currentTransaction.id}");
+    print(currentTransaction.id);
+
+    ;
+  }
+
+  void showWarning() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Lỗi'),
+            content: const Text('Vui lòng nhập đầy đủ thông tin'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Đóng'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }
