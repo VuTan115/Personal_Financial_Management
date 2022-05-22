@@ -140,15 +140,16 @@ class _HomeViewState extends State<HomeView> {
         color: Colors.white,
         child: Column(
           children: [
-            MyDatePicker(dateTime: dateTime),
+            MyDatePicker(
+              dateTime: dateTime,
+              filter: TransactionFilter.month,
+              isShowDatePicker: false,
+            ),
             BlocBuilder<HomeBloc, HomeState>(
               builder: (context, state) {
-                if (state.totalBudget.toDouble() > 0) {
-                  return _buildIndicatorChart(
-                      totalBudget: state.totalBudget.toDouble(),
-                      spent: state.spent.toDouble() * -1);
-                }
-                return _buildIndicatorChart(totalBudget: 0.0, spent: 0.0);
+                return _buildIndicatorChart(
+                    totalBudget: state.totalBudget.toDouble(),
+                    spent: state.spent.toDouble() * -1);
               },
             ),
             _buildListViewTitle(
@@ -166,6 +167,11 @@ class _HomeViewState extends State<HomeView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            MyDatePicker(
+              dateTime: dateTime,
+              filter: TransactionFilter.week,
+              isShowDatePicker: false,
+            ),
             _buildListViewTitle(
                 leftTitle: 'LỊCH SỬ GIAO DỊCH TUẦN NÀY', rightTitle: ""),
             _buildHistoryExpense(filter: 'week')
@@ -178,6 +184,11 @@ class _HomeViewState extends State<HomeView> {
       color: Colors.white,
       child: Column(
         children: [
+          MyDatePicker(
+            dateTime: dateTime,
+            filter: TransactionFilter.day,
+            isShowDatePicker: true,
+          ),
           _buildListViewTitle(
               leftTitle: 'LỊCH SỬ GIAO DỊCH HÔM NAY', rightTitle: ""),
           _buildHistoryExpense(filter: 'day')
@@ -331,9 +342,14 @@ class _HomeViewState extends State<HomeView> {
     return Expanded(
       child: BlocBuilder<HomeBloc, HomeState>(
         buildWhen: (previous, current) =>
-            previous.transactions != current.transactions,
+            previous.transactionMap![filter] != current.transactionMap![filter],
         builder: (context, state) {
-          if (state.transactions!.isEmpty) {
+          if (state.transactionMap![filter] == null) {
+            return const Center(
+              child: Text('Không có giao dịch nào'),
+            );
+          }
+          if (state.transactionMap![filter]!.isEmpty) {
             return const Center(
               child: Text('Không có giao dịch nào'),
             );

@@ -17,7 +17,7 @@ class StatisticView extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                MyDatePicker(dateTime: dateTime),
+                // MyDatePicker(dateTime: dateTime),
                 Container(
                     color: Colors.transparent,
                     height: 300,

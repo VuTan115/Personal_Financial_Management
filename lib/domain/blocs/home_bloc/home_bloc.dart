@@ -20,6 +20,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         _walletRepository = walletRepository,
         super(const HomeState()) {
     on<HomeSubscriptionRequested>(_onSubscriptionRequested);
+    on<HomeSubscriptionRequestedWithFilter>(_onDateChange);
   }
 
   final TransactionRepository _transactionRepository;
@@ -71,5 +72,49 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       transactionMap: transactionMap,
       spent: () => budget["spent"],
     ));
+  }
+
+  void _onDateChange(
+    HomeSubscriptionRequestedWithFilter event,
+    Emitter<HomeState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: () => HomeStatus.loading));
+      Map<String, List<t.Transaction>>? curTransactionMap =
+          state.transactionMap;
+
+      if (event.filter == TransactionFilter.day) {
+        List<t.Transaction> todayTransactions = await _transactionRepository
+            .getTransactions(event.date, TransactionFilter.day);
+        todayTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        curTransactionMap!["day"] = todayTransactions;
+      }
+      if (event.filter == TransactionFilter.week) {
+        List<t.Transaction> weekTransactions = await _transactionRepository
+            .getTransactions(event.date, TransactionFilter.week);
+        weekTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        curTransactionMap!["week"] = weekTransactions;
+      }
+      Map<String, dynamic> budget = {
+        "totalBudget": state.totalBudget,
+        "spent": state.spent
+      };
+      if (event.filter == TransactionFilter.month) {
+        List<t.Transaction> monthTransactions = await _transactionRepository
+            .getTransactions(event.date, TransactionFilter.month);
+        monthTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        curTransactionMap!["month"] = monthTransactions;
+        budget = await _budgetRepository.getMonthlyBudget(event.date);
+      }
+      print(budget);
+      emit(state.copyWith(
+        status: () => HomeStatus.success,
+        totalBudget: () => budget["totalBudget"],
+        transactionMap: curTransactionMap,
+        spent: () => budget["spent"],
+      ));
+    } catch (e) {
+      print(e);
+    }
   }
 }
