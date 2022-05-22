@@ -1,25 +1,63 @@
 import mongoose from 'mongoose'
 import Transaction from '../models/Transaction.js'
+import Category from '../models/Category.js'
 import Wallet from '../models/Wallet.js'
 import getWeekDay from '../helpers/getWeekDay.js'
 
 const { ObjectId } = mongoose.Types
 
 const createTransaction = async (req, res) => {
-  const {
-    amount, is_output, category, wallet
-  } = req.body
+  const { amount, is_output, category, wallet, created_at } = req.body
+  console.log(req.body)
+  const categoryRecord = await Category.findOne({ name: category })
+  const walletRecord = await Wallet.findOne({ name: wallet })
   let newTransaction = new Transaction({
-    amount, is_output, user_id: req.body.user.uid, category, wallet
+    amount,
+    is_output,
+    user_id: req.body.user.uid,
+    category: categoryRecord._id,
+    wallet: walletRecord._id,
+    created_at: created_at,
   })
   try {
     newTransaction = await newTransaction.save()
-    await Wallet.findOneAndUpdate({ _id: wallet }, {
-      $inc: {
-        amount: is_output ? -amount : amount
+    await Wallet.findOneAndUpdate(
+      { name: wallet },
+      {
+        $inc: {
+          amount: is_output ? -amount : amount,
+        },
       }
-    })
-    return res.status(200).json(newTransaction)
+    )
+
+    const newRecord = await Transaction.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              $expr: {
+                $eq: ['$_id', newTransaction._id],
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      {
+        $project: {
+          'category.limits_per_month': 0,
+        },
+      },
+    ])
+
+    return res.status(200).json(newRecord[0])
   } catch (error) {
     console.log(error)
     return res.status(500).json('server error')
@@ -205,41 +243,37 @@ const getUserTransaction = async (req, res) => {
 const getTransactionOfWallet = async (req, res) => {
   try {
     console.log(req.body.user.uid)
-    const transactions = await Transaction.aggregate(
-      [
-        {
-          $match: {
-            $and: [
-              {
-                $expr: {
-                  $eq: [
-                    '$user_id', req.body.user.uid
-                  ]
-                }
+    const transactions = await Transaction.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              $expr: {
+                $eq: ['$user_id', req.body.user.uid],
               },
-              {
-                $expr: {
-                  $eq: [
-                    '$wallet', ObjectId(req.query.wallet_id)
-                  ]
-                }
-              }
-            ]
-          }
-        }, {
-          $lookup: {
-            from: 'categories',
-            localField: 'category',
-            foreignField: '_id',
-            as: 'category'
-          }
-        }, {
-          $project: {
-            'category.limits_per_month': 0
-          }
-        }
-      ]
-    )
+            },
+            {
+              $expr: {
+                $eq: ['$wallet', ObjectId(req.query.wallet_id)],
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      {
+        $project: {
+          'category.limits_per_month': 0,
+        },
+      },
+    ])
 
     return res.status(200).json(transactions)
   } catch (error) {
@@ -252,7 +286,7 @@ const TransactionController = {
   createTransaction,
   getFilteredTransaction,
   getUserTransaction,
-  getTransactionOfWallet
+  getTransactionOfWallet,
 }
 
 export default TransactionController

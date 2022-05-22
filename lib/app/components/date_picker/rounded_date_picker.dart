@@ -93,7 +93,7 @@ Future<DateTime?> showMyDatePicker(
         backgroundPicker: MyAppColors.white000,
       ));
   if (newDateTime != null) {
-    return newDateTime;
+    return newDateTime.add(Duration(hours: 12, minutes: 59, seconds: 59));
   }
   return DateTime.now();
 }

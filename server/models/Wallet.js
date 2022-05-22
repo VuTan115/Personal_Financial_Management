@@ -11,7 +11,8 @@ const WalletModel = new Schema(
     },
     name: {
       type: String,
-      default: 'Không tên'
+      required: true,
+      unique: true
     },
     type: {
       type: String,

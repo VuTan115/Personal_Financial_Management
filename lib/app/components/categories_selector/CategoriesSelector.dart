@@ -249,8 +249,7 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
                                   setState(() {
                                     // add new category to categories list at first position of widget.categories
                                     Map<String, Widget> newMap = {
-                                      _amountController.text:
-                                          MyAppIcons.savingsBag
+                                      _amountController.text: MyAppIcons.person
                                     };
                                     newMap.addAll(widget.categories);
                                     widget.categories = newMap;

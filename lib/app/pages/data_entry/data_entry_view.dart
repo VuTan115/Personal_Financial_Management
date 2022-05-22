@@ -23,12 +23,12 @@ class _DataEntryViewState extends State<DataEntryView>
   String _selectedDateTab1 = 'Chọn ngày';
   String _selectedDateTab2 = 'Chọn ngày';
   String dropdownValue = 'Ăn uống';
-  late final Map<String, Widget> moneyCategories;
-  late final TextEditingController _amountControllerTab1;
-  late final TextEditingController _amountControllerTab2;
+  late Map<String, Widget> moneyCategories;
+  late TextEditingController _amountControllerTab1;
+  late TextEditingController _amountControllerTab2;
   late String selectedCategory;
-  late final Map<String, Widget> wallets;
-  late final Map<String, Widget> inComeWallets;
+  late Map<String, Widget> wallets;
+  late Map<String, Widget> inComeWallets;
   late Map<String, Map<String, String>> _childState;
   late Map<String, dynamic>? allWalletInfor;
   late List<Transaction>? allTransactionInfor;
@@ -42,7 +42,7 @@ class _DataEntryViewState extends State<DataEntryView>
       "Giáo dục": MyAppIcons.book,
       "Nhu yếu phẩm": MyAppIcons.toothBrush,
       "Quà cáp": MyAppIcons.gift,
-      "Quần áo - Làm đẹp": MyAppIcons.clothes,
+      "Làm đẹp": MyAppIcons.clothes,
       "Nhà ở": MyAppIcons.key,
       "Giải trí": MyAppIcons.music,
       "Di chuyển": Icon(Icons.agriculture),
@@ -79,8 +79,15 @@ class _DataEntryViewState extends State<DataEntryView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    print('build');
-    return _buildTabBar();
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        // state.allWallets!.values.forEach((element) {
+        //   print(element);
+        // });
+
+        return _buildTabBar();
+      },
+    );
   }
 
   Widget _buildTabBar() {
@@ -200,12 +207,12 @@ class _DataEntryViewState extends State<DataEntryView>
                         // set default wallet and category
                         allWalletInfor = state.allWallets;
                         allTransactionInfor = state.allTransactions;
-                        _childState['tab1']!['wallet'] =
-                            allWalletInfor!.keys.first;
-                        _childState['tab2']!['income'] =
-                            allWalletInfor!.keys.first;
-                        _childState['tab1']!['category'] = 'Ăn uống';
-                        _childState['tab2']!['category'] = 'Ăn uống';
+                        // _childState['tab1']!['wallet'] =
+                        //     allWalletInfor!.values.first[0].name;
+                        // _childState['tab2']!['income'] =
+                        //     inComeWallets.keys.first;
+                        // _childState['tab1']!['category'] = 'Ăn uống';
+                        // _childState['tab2']!['category'] = 'Ăn uống';
 
                         return CateGoriesSeletor(
                           categories: _mapWalletToCateGories(state.allWallets!),
@@ -446,17 +453,22 @@ class _DataEntryViewState extends State<DataEntryView>
   }
 
   void callBack(childState) {
+    print('childState: $childState');
     switch (childState['parentKey']) {
       case 'tab1':
-        _childState['tab1']!
-            .update(childState['selectorType'], (_) => childState['value']);
+        setState(() {
+          _childState['tab1']!
+              .update(childState['selectorType'], (_) => childState['value']);
+        });
         break;
       case 'tab2':
-        _childState['tab2']!
-            .update(childState['selectorType'], (_) => childState['value']);
+        setState(() {
+          _childState['tab2']!
+              .update(childState['selectorType'], (_) => childState['value']);
+        });
         break;
     }
-    print(_childState);
+    print('_childState: $_childState');
   }
 
   Map<String, Widget> _mapWalletToCateGories(Map<String, dynamic> wallets) {
@@ -497,23 +509,19 @@ class _DataEntryViewState extends State<DataEntryView>
   }
 
   void onTab1Tap() {
+    print(_childState['tab1']);
     if (_childState['tab1']!.containsValue('')) {
       showWarning();
       return;
     }
-    final Map<String, String> data = _childState['tab1']!;
-    data['amount'] = _amountControllerTab1.text;
-    final currentWallet = allWalletInfor!.values
-        .firstWhere((element) => (element[0].name == data['wallet']));
-    _childState['tab1']!.putIfAbsent('walletId', () => currentWallet[0].id);
 
     context.read<TransactionCubit>().createNewTransaction(
           amount: int.parse("${_childState['tab1']!['amount']}"),
-          category_id: ("${_childState['tab1']!['category']}"),
-          wallet_id: "${_childState['tab1']!['walletId']}",
+          category: ("${_childState['tab1']!['category']}"),
+          wallet: "${_childState['tab1']!['wallet']}",
+          created_at: DateTime.parse("${_childState['tab1']!['date']}"),
           is_output: true,
         );
-    print(_childState['tab1']);
   }
 
   void onTab2Tap() {
@@ -523,14 +531,14 @@ class _DataEntryViewState extends State<DataEntryView>
       return;
     }
     final Map<String, String> data = _childState['tab2']!;
-    data['amount'] = _amountControllerTab2.text;
-    final Transaction currentTransaction = allTransactionInfor!.firstWhere(
-      (element) => element.categoryName == data['income'],
-    );
-    _childState['tab2']!
-        .putIfAbsent('incomeId', () => "${currentTransaction.id}");
-    print(currentTransaction.id);
 
+    context.read<TransactionCubit>().createNewTransaction(
+          amount: int.parse("${_childState['tab2']!['amount']}"),
+          category: ("${_childState['tab2']!['category']}"),
+          wallet: "${_childState['tab2']!['income']}",
+          created_at: DateTime.parse("${_childState['tab2']!['date']}"),
+          is_output: false,
+        );
     ;
   }
 
