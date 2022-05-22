@@ -69,6 +69,8 @@ const getFilteredTransaction = async (req, res) => {
   try {
     let transactions
     const reqTimestamp = new Date(timestamp)
+    // console.log('Timestamp Server' + timestamp)
+    // console.log('reqTimestamp Server' + reqTimestamp)
     if (filter === 'TransactionFilter.month') {
       transactions = await Transaction.aggregate([
         {
@@ -199,6 +201,8 @@ const getFilteredTransaction = async (req, res) => {
         },
       ])
     }
+
+    console.log(reqTimestamp.toISOString().split('T')[0])
     return res.status(200).json(transactions)
   } catch (error) {
     console.log(error)

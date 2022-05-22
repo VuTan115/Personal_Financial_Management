@@ -92,8 +92,6 @@ Widget buildListTileExpense({
 Widget buildHistoryExpense() {
   return Expanded(
     child: BlocBuilder<HomeBloc, HomeState>(
-      buildWhen: (previous, current) =>
-          previous.transactions != current.transactions,
       builder: (context, state) {
         if (state.transactions!.isEmpty) {
           return const Center(

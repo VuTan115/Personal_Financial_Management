@@ -163,7 +163,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildWeekTabView() {
     return Container(
-        color: Colors.transparent,
+        color: Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -341,8 +341,8 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildHistoryExpense({String filter = ''}) {
     return Expanded(
       child: BlocBuilder<HomeBloc, HomeState>(
-        buildWhen: (previous, current) =>
-            previous.transactionMap![filter] != current.transactionMap![filter],
+        // buildWhen: (previous, current) =>
+        //     previous.transactionMap![filter] != current.transactionMap![filter],
         builder: (context, state) {
           if (state.transactionMap![filter] == null) {
             return const Center(

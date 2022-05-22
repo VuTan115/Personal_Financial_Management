@@ -6,8 +6,11 @@ import 'package:personal_financial_management/app/utils/assets.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
 
 class MyPieChart extends StatefulWidget {
-  const MyPieChart({Key? key}) : super(key: key);
-
+  const MyPieChart({
+    Key? key,
+    required this.children,
+  }) : super(key: key);
+  final List<Widget> children;
   @override
   State<StatefulWidget> createState() => MyPieChartState();
 }
@@ -78,6 +81,7 @@ class MyPieChartState extends State {
     );
   }
 
+  // final dummyData =
   List<PieChartSectionData> showingSections() {
     return List.generate(3, (i) {
       final isTouched = i == touchedIndex;

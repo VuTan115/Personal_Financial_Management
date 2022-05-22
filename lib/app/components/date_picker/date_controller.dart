@@ -36,7 +36,8 @@ class _MyDatePickerState extends State<MyDatePicker> {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 56),
-      color: Colors.transparent,
+      color: Colors.white,
+
       width: MediaQuery.of(context).size.width,
       // show date and two buttons of arrows to choose date
       child: Padding(
@@ -79,14 +80,11 @@ class _MyDatePickerState extends State<MyDatePicker> {
               }
             : () {},
         child: Container(
-          color: Colors.transparent,
+          color: Colors.white,
           height: double.maxFinite,
           child: Padding(
             padding: EdgeInsets.only(
                 left: MediaQuery.of(context).size.width * 0.1.toDouble()),
-
-            //vertical alignment this child
-
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -94,7 +92,7 @@ class _MyDatePickerState extends State<MyDatePicker> {
                     ? '${_today.month.toString().padLeft(2, '0')}/${_today.year}'
                     : widget.filter == TransactionFilter.week
                         ? '${monday.day.toString().padLeft(2, '0')}/${monday.month.toString().padLeft(2, '0')}/${monday.year}' +
-                            ' -> ' +
+                            ' - ' +
                             '${sunday.day.toString().padLeft(2, '0')}/${sunday.month.toString().padLeft(2, '0')}/${sunday.year}'
                         : '${_today.day.toString().padLeft(2, '0')}/${_today.month.toString().padLeft(2, '0')}/${_today.year}',
                 style: const TextStyle(
