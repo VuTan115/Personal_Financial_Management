@@ -10,6 +10,7 @@ import 'package:personal_financial_management/app/utils/global_key.dart';
 import 'package:personal_financial_management/domain/blocs/auth_bloc/authentication_bloc.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
 import 'package:personal_financial_management/domain/repositories/budget_repo.dart';
+import 'package:personal_financial_management/domain/repositories/category_repo.dart';
 import 'package:personal_financial_management/domain/repositories/repositories.dart';
 import 'package:personal_financial_management/domain/repositories/user_repo.dart';
 
@@ -26,6 +27,7 @@ class _MyAppState extends State<MyApp> {
   late final TransactionRepository transactionRepository;
   late final BudgetRepository budgetRepository;
   late final WalletRepository walletRepository;
+  late final CategoryRepository categoryRepository;
   NavigatorState get _navigator => GlobalKeys.appNavigatorKey.currentState!;
   @override
   void initState() {
@@ -36,6 +38,7 @@ class _MyAppState extends State<MyApp> {
     transactionRepository = TransactionRepository();
     budgetRepository = BudgetRepository();
     walletRepository = WalletRepository();
+    categoryRepository = CategoryRepository();
   }
 
   @override
@@ -46,6 +49,7 @@ class _MyAppState extends State<MyApp> {
           RepositoryProvider.value(value: transactionRepository),
           RepositoryProvider.value(value: budgetRepository),
           RepositoryProvider.value(value: walletRepository),
+          RepositoryProvider.value(value: categoryRepository),
         ],
         child: MultiBlocProvider(
           providers: [
