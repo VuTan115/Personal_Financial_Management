@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import Category from '../models/Category.js'
 import Transaction from '../models/Transaction.js'
 import LimitsPerMonth from '../models/LimitsPerMonth.js'
@@ -311,9 +312,112 @@ const getMonthlyDetailBudget = async (req, res) => {
     return res.status(500).json('server error')
   }
 }
+const createBudget = async (req, res) => {
+  const {
+    month, amount
+  } = req.body
+  let newBudget = new LimitsPerMonth({
+    month, amount, user_id: req.body.user.uid
+  })
+  try {
+    const reqTimestamp = new Date(month)
+    const curBudget = await LimitsPerMonth.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              $expr: {
+                $eq: [
+                  {
+                    $month: '$month',
+                  },
+                  reqTimestamp.getUTCMonth() + 1,
+                ],
+              },
+            },
+            {
+              $expr: {
+                $eq: [
+                  {
+                    $year: '$month',
+                  },
+                  reqTimestamp.getUTCFullYear(),
+                ],
+              },
+            },
+            {
+              $expr: {
+                $eq: ['$user_id', req.body.user.uid],
+              },
+            },
+          ],
+        },
+      }
+    ])
+    if (curBudget.length === 0) {
+      newBudget = await newBudget.save()
+    } else {
+      newBudget = await LimitsPerMonth.findOneAndUpdate({ _id: curBudget[0]._id }, {
+        amount
+      }, {
+        new: true
+      })
+    }
+    return res.status(200).json(newBudget)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json('server error')
+  }
+}
+const createCategoryBudget = async (req, res) => {
+  const {
+    month, amount, category_id
+  } = req.body
+
+  const reqTimestamp = new Date(month)
+  const firstDay = new Date(reqTimestamp.getFullYear(), reqTimestamp.getMonth(), 1)
+  firstDay.setHours(0, 0, 0, 0)
+  const lastDay = new Date(reqTimestamp.getFullYear(), reqTimestamp.getMonth() + 1, 0)
+  lastDay.setHours(23, 59, 59, 999)
+  try {
+    const update = {}
+    update['limits_per_month.$.amount'] = amount
+    let result = await Category.updateOne({
+      _id: mongoose.Types.ObjectId(category_id),
+      'limits_per_month.month': {
+        $gte: firstDay,
+        $lte: lastDay
+      },
+      'limits_per_month.user_id': req.body.user.uid
+    }, update, {
+      new: true
+    })
+    if (result.matchedCount === 0) {
+      result = await Category.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(category_id)
+      }, {
+        $push: {
+          limits_per_month: {
+            amount,
+            user_id: req.body.user.uid,
+            month: month
+          }
+        }
+      }, {
+        new: true
+      })
+    }
+    return res.status(200).json('oke')
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json('server error')
+  }
+}
 const BudgetController = {
   getMonthlyBudget,
-  getMonthlyDetailBudget
+  getMonthlyDetailBudget,
+  createBudget,
+  createCategoryBudget
 }
 
 export default BudgetController
