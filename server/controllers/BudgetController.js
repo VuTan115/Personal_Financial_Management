@@ -133,7 +133,7 @@ const getMonthlyDetailBudget = async (req, res) => {
         }
       }
     ]).limit(1)
-    let spent = await Category.aggregate(
+    const spent = await Category.aggregate(
       [
         {
           $match: {
@@ -189,6 +189,46 @@ const getMonthlyDetailBudget = async (req, res) => {
               }
             ]
           }
+        },
+      ]
+    )
+    const categories = await Category.aggregate(
+      [
+        {
+          $match: {
+            $and: [
+              {
+                $expr: {
+                  $eq: [
+                    '$is_output', true
+                  ]
+                }
+              },
+              {
+                $or: [
+                  {
+                    $expr: {
+                      $eq: [
+                        '$user_id', req.body.user.uid
+                      ]
+                    }
+                  },
+                  {
+                    $expr: {
+                      $eq: [
+                        '$user_id', null
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          $project: {
+            limits_per_month: 0
+          }
         }, {
           $lookup: {
             from: 'transactions',
@@ -239,7 +279,7 @@ const getMonthlyDetailBudget = async (req, res) => {
             _id: {
               _id: '$_id',
               name: '$name',
-              limits_per_month: '$limits_per_month.amount'
+              user_id: '$user_id'
             },
             spent: {
               $sum: '$transactions.amount'
@@ -248,7 +288,7 @@ const getMonthlyDetailBudget = async (req, res) => {
         }
       ]
     )
-    let categories = await Category.aggregate(
+    let allCategories = await Category.aggregate(
       [
         {
           $match: {
@@ -288,24 +328,24 @@ const getMonthlyDetailBudget = async (req, res) => {
         }
       ]
     )
-    spent = spent.map((el) => ({ ...el._id, spent: el.spent }))
-    console.log(spent)
-    console.log(spent.findIndex((el) => el._id.toString() === '628127117ad0d1878fe1dc09'))
-    categories = categories.map((element) => {
-      const index = spent.findIndex((el) => el._id.toString() === element._id.toString())
-      console.log(index)
-      if (index !== -1) {
-        return {
-          ...element,
-          limits_per_month: spent[index].limits_per_month,
-          spent: spent[index].spent
-        }
+    allCategories = allCategories.map((element) => {
+      const temp = { ...element, limits_per_month: -1, spent: -1 }
+      const indexSpent = spent.findIndex((el) => el._id.toString() === element._id.toString())
+      const indexCategories = categories
+        .findIndex((el) => el._id._id.toString() === element._id.toString())
+      console.log(indexSpent)
+      console.log(indexCategories)
+      if (indexSpent !== -1) {
+        temp.limits_per_month = spent[indexSpent].limits_per_month.amount
       }
-      return { ...element, spent: -1, limits_per_month: -1 }
+      if (indexCategories !== -1) {
+        temp.spent = categories[indexCategories].spent
+      }
+      return temp
     })
     return res.status(200).json({
       totalBudget: totalBudget.length !== 0 ? totalBudget[0].amount : -1,
-      categories: categories
+      categories: allCategories
     })
   } catch (error) {
     console.log(error)

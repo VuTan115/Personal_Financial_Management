@@ -38,4 +38,16 @@ class MyAppColors {
 
   static const Color opacity8 = Color.fromRGBO(245, 245, 245, 0.8);
   static const Color opacity6 = Color.fromRGBO(245, 245, 245, 0.6);
+
+  // Other colors of icons
+  static const Color hospitalColor = Color.fromRGBO(187, 107, 217, 1.0);
+  static const Color waterDropColor = Color.fromRGBO(155, 81, 224, 1.0);
+  static const Color waveColor = Color.fromRGBO(86, 204, 242, 1.0);
+  static const Color keyColor = Color.fromRGBO(45, 156, 219, 1.0);
+  static const Color noteColor = Color.fromRGBO(47, 128, 237, 1.0);
+  static const Color lunchColor = Color.fromRGBO(235, 87, 87, 1.0);
+  static const Color toothBrushColor = Color.fromRGBO(242, 153, 74, 1.0);
+  static const Color bookColor = Color.fromRGBO(242, 201, 76, 1.0);
+  static const Color giftColor = Color.fromRGBO(111, 207, 151, 1.0);
+  static const Color clothesColor = Color.fromRGBO(33, 150, 83, 1.0);
 }
