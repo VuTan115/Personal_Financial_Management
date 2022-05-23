@@ -192,7 +192,7 @@ const getMonthlyDetailBudget = async (req, res) => {
         },
       ]
     )
-    let categories = await Category.aggregate(
+    const categories = await Category.aggregate(
       [
         {
           $match: {
@@ -288,22 +288,64 @@ const getMonthlyDetailBudget = async (req, res) => {
         }
       ]
     )
-    console.log(categories)
-    categories = categories.map((element) => {
-      const index = spent.findIndex((el) => el._id.toString() === element._id._id.toString())
-      console.log(index)
-      if (index !== -1) {
-        return {
-          ...element._id,
-          spent: element.spent,
-          limits_per_month: spent[index].limits_per_month.amount,
+    let allCategories = await Category.aggregate(
+      [
+        {
+          $match: {
+            $and: [
+              {
+                $expr: {
+                  $eq: [
+                    '$is_output', true
+                  ]
+                }
+              },
+              {
+                $or: [
+                  {
+                    $expr: {
+                      $eq: [
+                        '$user_id', req.body.user.uid
+                      ]
+                    }
+                  },
+                  {
+                    $expr: {
+                      $eq: [
+                        '$user_id', null
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          $project: {
+            limits_per_month: 0
+          }
         }
+      ]
+    )
+    allCategories = allCategories.map((element) => {
+      const temp = { ...element, limits_per_month: -1, spent: -1 }
+      const indexSpent = spent.findIndex((el) => el._id.toString() === element._id.toString())
+      const indexCategories = categories
+        .findIndex((el) => el._id._id.toString() === element._id.toString())
+      console.log(indexSpent)
+      console.log(indexCategories)
+      if (indexSpent !== -1) {
+        temp.limits_per_month = spent[indexSpent].limits_per_month.amount
       }
-      return { ...element._id, spent: element.spent, limits_per_month: -1 }
+      if (indexCategories !== -1) {
+        temp.spent = categories[indexCategories].spent
+      }
+      return temp
     })
     return res.status(200).json({
       totalBudget: totalBudget.length !== 0 ? totalBudget[0].amount : -1,
-      categories: categories
+      categories: allCategories
     })
   } catch (error) {
     console.log(error)
