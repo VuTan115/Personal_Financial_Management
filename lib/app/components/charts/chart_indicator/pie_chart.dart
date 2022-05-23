@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
+import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/assets.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
@@ -12,10 +13,12 @@ class StatisticChart extends StatefulWidget {
       {Key? key,
       required this.titleChart,
       required this.amountChart,
+      required this.totalBudget,
       this.data})
       : super(key: key);
   final Widget titleChart;
   final Widget amountChart;
+  final int totalBudget;
   final data;
 
   @override
@@ -26,9 +29,9 @@ class StatisticChartState extends State<StatisticChart> {
   int touchedIndex = 100;
 
   Map<String, String> _dummyData = {
-    "Ăn uống": "40",
-    "Giáo dục": "30",
-    "Nhu yếu phẩm": "30",
+    // "Ăn uống": "40",
+    // "Giáo dục": "30",
+    // "Nhu yếu phẩm": "30",
   };
   @override
   void initState() {
@@ -38,12 +41,18 @@ class StatisticChartState extends State<StatisticChart> {
   @override
   Widget build(BuildContext context) {
     widget.data.forEach((e) {
-      print("${(e['spent'] / e['budget']).toStringAsFixed(2)}");
-      if (e['budget'] > 0 && (e['spent'] / e['budget']) < 1) {
+      if (e['budget'] > 0 && (e['budget'] / widget.totalBudget) < 1) {
         _dummyData.update(
           e['name'],
-          (value) => "${(e['spent'] / e['budget'] * 100).toStringAsFixed(2)}",
-          ifAbsent: () => "${(e['spent'] / e['budget'] * 100)}",
+          (value) => "${(e['budget'] / widget.totalBudget * 100)}",
+          ifAbsent: () => "${(e['budget'] / widget.totalBudget * 100)}",
+        );
+      }
+      if (e['budget'] == -1) {
+        _dummyData.update(
+          e['name'],
+          (value) => "0",
+          ifAbsent: () => "0",
         );
       }
     });
@@ -99,76 +108,20 @@ class StatisticChartState extends State<StatisticChart> {
 
   // final dummyData =
   List<PieChartSectionData> showingSections() {
-    return List.generate(_dummyData.length, (i) {
+    // print(_dummyData);
+    double sum = 0;
+    List<PieChartSectionData> pieData = List.generate(_dummyData.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 20.0 : 16.0;
       final radius = isTouched ? 64.0 : 40.0;
       final widgetSize = isTouched ? 28.0 : 36.0;
-      // switch (i) {
-      //   case 0:
-      //     return PieChartSectionData(
-      //       color: MyAppColors.gray700,
-      //       value: 40,
-      //       title: isTouched ? '40%' : '',
-      //       radius: radius,
-      //       titleStyle: TextStyle(
-      //         fontSize: fontSize,
-      //         fontWeight: FontWeight.bold,
-      //         color: MyAppColors.white000,
-      //       ),
-      //       badgeWidget: _Badge(
-      //         SocialIcon.smartPhone,
-      //         size: widgetSize,
-      //         borderColor: Colors.transparent,
-      //       ),
-      //       badgePositionPercentageOffset: isTouched ? 1.07 : .5,
-      //     );
-      //   case 1:
-      //     return PieChartSectionData(
-      //       color: MyAppColors.gray500,
-      //       value: 30,
-      //       title: isTouched ? '30%' : '',
-      //       radius: radius,
-      //       titleStyle: TextStyle(
-      //         fontSize: fontSize,
-      //         fontWeight: FontWeight.bold,
-      //         color: MyAppColors.white000,
-      //       ),
-      //       badgeWidget: _Badge(
-      //         FinancialIcon.penny,
-      //         size: widgetSize,
-      //         borderColor: Colors.transparent,
-      //       ),
-      //       badgePositionPercentageOffset: isTouched ? 1.07 : .5,
-      //     );
-      //   case 2:
-      //     return PieChartSectionData(
-      //       color: MyAppColors.gray300,
-      //       value: 30,
-      //       title: isTouched ? '30%' : '',
-      //       radius: radius,
-      //       titleStyle: TextStyle(
-      //         fontSize: fontSize,
-      //         fontWeight: FontWeight.bold,
-      //         color: MyAppColors.white000,
-      //       ),
-      //       badgeWidget: _Badge(
-      //         FinancialIcon.bankBuilding,
-      //         size: widgetSize,
-      //         borderColor: Colors.transparent,
-      //       ),
-      //       badgePositionPercentageOffset: isTouched ? 1.07 : .5,
-      //     );
-      //   default:
-      //     throw 'Oh no';
-      // }
-
-      // if(_dummyData)
+      sum += double.parse(_dummyData.values.elementAt(i).padLeft(4));
       return PieChartSectionData(
         color: generateCategoryColor(_dummyData.keys.elementAt(i)),
-        value: double.parse(_dummyData.values.elementAt(i)),
-        title:
-            isTouched ? '${double.parse(_dummyData.values.elementAt(i))}%' : '',
+        value: double.parse(_dummyData.values.elementAt(i).padLeft(4)),
+        title: isTouched
+            ? '${double.parse(_dummyData.values.elementAt(i).padLeft(4))}%'
+            : '',
         radius: radius,
         titleStyle: TextStyle(
           fontSize: fontSize,
@@ -184,6 +137,26 @@ class StatisticChartState extends State<StatisticChart> {
         badgePositionPercentageOffset: isTouched ? 1.07 : .5,
       );
     }, growable: true);
+
+    pieData.add(PieChartSectionData(
+      color: MyAppColors.gray200,
+      value: 100 - sum,
+      title: '',
+      radius: 40,
+      titleStyle: TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: MyAppColors.white000,
+      ),
+      // badgeWidget: _Badge(
+      //   SocialIcon.smartPhone,
+      //   size: 36,
+      //   borderColor: Colors.transparent,
+      //   icon: MyAppIcons.person,
+      // ),
+      badgePositionPercentageOffset: 0.5,
+    ));
+    return pieData;
   }
 }
 

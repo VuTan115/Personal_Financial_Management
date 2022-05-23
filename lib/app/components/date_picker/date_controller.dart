@@ -7,6 +7,7 @@ import 'package:personal_financial_management/app/components/date_picker/rounded
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/utils.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
+import 'package:personal_financial_management/domain/blocs/statistic/statistic_bloc.dart';
 
 class MyDatePicker extends StatefulWidget {
   MyDatePicker({
@@ -162,6 +163,7 @@ class _MyDatePickerState extends State<MyDatePicker> {
                   : (widget.filter == TransactionFilter.week)
                       ? _today.add(Duration(days: 7))
                       : _today.add(Duration(days: 1));
+              print(_today);
               homeBlocCall(date: _today, filter: widget.filter);
             });
           },
@@ -177,6 +179,11 @@ class _MyDatePickerState extends State<MyDatePicker> {
         HomeSubscriptionRequestedWithFilter(
             date: _today, filter: widget.filter),
       );
+    }
+    if (widget.pageKey == 'statistic') {
+      print('statistic');
+      BlocProvider.of<StatisticBloc>(context)
+          .add(StatisticUpdateCategory(dateTime: _today));
     }
   }
 }

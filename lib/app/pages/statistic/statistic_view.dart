@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:personal_financial_management/app/components/charts/chart_indicator/pie_chart.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
 import 'package:personal_financial_management/app/components/date_picker/date_controller.dart';
+import 'package:personal_financial_management/app/components/date_picker/rounded_date_picker.dart';
+import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
 import 'package:personal_financial_management/domain/blocs/statistic/statistic_bloc.dart';
@@ -59,7 +62,8 @@ class _StatisticViewState extends State<StatisticView> {
       },
     ],
   };
-
+  String _selectedDateString = 'Chọn ngày';
+  late String _currentDate;
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -68,7 +72,6 @@ class _StatisticViewState extends State<StatisticView> {
           dateTime: DateTime.now(),
         )),
       child: BlocBuilder<StatisticBloc, StatisticState>(
-        // buildWhen: (previous, current) => previous.status != current.status,
         builder: (context, state) {
           if (state.status == StatisticStatus.loading) {
             return const Center(
@@ -81,6 +84,8 @@ class _StatisticViewState extends State<StatisticView> {
                 'totalBudget', (value) => state.data['totalBudget']);
             dummyData.update('categories', (value) => state.data['categories']);
           }
+          print(state.dateTime);
+          _currentDate = (state.dateTime);
           return Scaffold(
             body: Center(
               child: Container(
@@ -101,14 +106,17 @@ class _StatisticViewState extends State<StatisticView> {
                         child: StatisticChart(
                           titleChart: Text("Ngân sách"),
                           amountChart: Text(
-                            "${numberFormat.format(dummyData['totalBudget'])}",
+                            dummyData['totalBudget'] < 0
+                                ? "Chưa thiết lập"
+                                : numberFormat.format(dummyData['totalBudget']),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 30,
                               color: MyAppColors.gray900,
                               overflow: TextOverflow.clip,
                             ),
                           ),
+                          totalBudget: dummyData['totalBudget'],
                           data: dummyData['categories'],
                         ),
                       ),
@@ -127,20 +135,27 @@ class _StatisticViewState extends State<StatisticView> {
                                 dummyData['categories'].elementAt(index);
                             return ListTile(
                               onTap: () {
-                                print(element['_id']);
+                                onCategoryTap(element['_id']);
                               },
                               leading: generateCategoryIcon(element['name']),
                               title: Text(element['name'] ?? 'Danh mục tự do'),
-                              subtitle: Text(element['budget'] == 0
+                              subtitle: Text(element['budget'] < 0
                                   ? 'Chưa chi tiêu'
                                   : "Đã tiêu ${numberFormat.format(element['spent'])}"),
-                              trailing: Text(
-                                  '${numberFormat.format(element['budget'])} đ'),
+                              trailing: element['budget'] > 0
+                                  ? Text(
+                                      '${numberFormat.format(element['budget'])} đ')
+                                  : const Text(
+                                      'Chưa thiết lập ngân sách',
+                                      style: TextStyle(
+                                          color:
+                                              Color.fromARGB(255, 179, 80, 80)),
+                                    ),
                             );
                           }),
                           separatorBuilder: (context, index) {
                             // if (index == 0) return Container();
-                            return Divider(
+                            return const Divider(
                               height: 1,
                               color: MyAppColors.gray300,
                             );
@@ -155,5 +170,151 @@ class _StatisticViewState extends State<StatisticView> {
         },
       ),
     );
+  }
+
+  void onCategoryTap(String categoryId) {
+    TextEditingController _newCategoryName = TextEditingController();
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Stack(
+              clipBehavior: Clip.antiAlias,
+              children: <Widget>[
+                Positioned(
+                  right: -40.0,
+                  top: -40.0,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                          color: MyAppColors.accent700,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              width: 1, color: MyAppColors.accent800)),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Expanded(
+                    child: Form(
+                      // key: _formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            TextFormField(
+                              controller: _newCategoryName,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[0-9]')),
+                              ],
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: const OutlineInputBorder(),
+                                focusColor: MyAppColors.accent800,
+                                focusedBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: MyAppColors.accent800,
+                                        width: 1)),
+                                labelText: 'Thiết lập ngân sách cho danh mục',
+                                hintText: 'Nhập số tiền',
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 26),
+                                  child: MyAppIcons.vnd,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: Center(
+                                  child: Padding(
+                                padding: const EdgeInsets.all(0.0),
+                                child: BlocProvider(
+                                  create: (context) => StatisticBloc(),
+                                  child: BlocBuilder<StatisticBloc,
+                                      StatisticState>(
+                                    builder: (statisticContext, state) {
+                                      return ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            elevation: 4,
+                                            primary: MyAppColors.accent800,
+                                            alignment: Alignment.center),
+                                        onPressed: () {
+                                          onCategorySave(
+                                              context: statisticContext,
+                                              budget: _newCategoryName.text,
+                                              categoryId: categoryId);
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: const [
+                                              Text(
+                                                'THIẾT LẬP',
+                                                style: TextStyle(
+                                                  color: MyAppColors.white000,
+                                                  fontSize: 20,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              )),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+    print(categoryId);
+  }
+
+  void onCategorySave(
+      {required BuildContext context,
+      required String budget,
+      required String categoryId}) {
+    BlocProvider.of<StatisticBloc>(context).add(
+      StatisticCreateCategory(
+        categoryId: categoryId,
+        amount: int.parse(budget),
+        dateTime: DateTime.parse(_currentDate),
+      ),
+    );
+
+    // update dummyData with new data is {id:categoryId, amount:budget}
+    setState(() {
+      dummyData['categories'].forEach((element) {
+        if (element['_id'] == categoryId) {
+          element['budget'] = int.parse(budget);
+        }
+      });
+    });
+    Navigator.of(context).pop();
   }
 }

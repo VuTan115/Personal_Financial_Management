@@ -38,7 +38,9 @@ class BudgetRepository {
   }
 
   Future<String> createCategoryBudget(
-      DateTime timestamp, String category_id, num amount) async {
+      {required DateTime timestamp,
+      required String category_id,
+      required num amount}) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<String> res = await Dio().post(
