@@ -21,4 +21,18 @@ class BudgetRepository {
       throw error;
     }
   }
+
+  Future<Map<String, dynamic>> getBudgetDetail(String type) async {
+    try {
+      String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
+      Response<Map<String, dynamic>> res = await Dio().get(
+          '$IPAddressTan/api/budget/detail',
+          options: Options(headers: {'AuthToken': token}),
+          queryParameters: {'is_output': type});
+      Map<String, dynamic>? result = res.data;
+      return result!;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
