@@ -23,14 +23,3 @@ class CategoryCreated extends CategoryState {
 }
 
 class CategoryCreating extends CategoryState {}
-
-class CategoryFetching extends CategoryState {}
-
-class CategoryFetched extends CategoryState {
-  final List<String> categories;
-
-  CategoryFetched({required this.categories});
-
-  @override
-  List<Object> get props => [categories];
-}

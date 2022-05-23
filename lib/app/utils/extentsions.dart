@@ -121,3 +121,32 @@ Widget buildHistoryExpense() {
     ),
   );
 }
+
+Color generateCategoryColor(String name) {
+  switch (name) {
+    case 'Xăng xe':
+      return Colors.orange;
+    case "Nhu yếu phẩm":
+      return Colors.green;
+    case "Giáo dục":
+      return Colors.blue;
+    case "Giải trí":
+      return Colors.purple;
+    case "Quà cáp":
+      return Colors.yellow;
+    case "Làm đẹp":
+      return Colors.pink;
+    case "Nhà ở":
+      return Colors.red;
+    case "Di chuyển":
+      return Colors.green;
+    case "Ăn uống":
+      return Colors.orange;
+    case "Thưởng":
+      return Colors.yellow;
+    case "Lương":
+      return Colors.blue;
+    default:
+      return Colors.pink;
+  }
+}

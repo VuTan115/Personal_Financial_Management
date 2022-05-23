@@ -144,6 +144,7 @@ class _HomeViewState extends State<HomeView> {
               dateTime: dateTime,
               filter: TransactionFilter.month,
               isShowDatePicker: false,
+              pageKey: "home",
             ),
             BlocBuilder<HomeBloc, HomeState>(
               builder: (context, state) {
@@ -171,6 +172,8 @@ class _HomeViewState extends State<HomeView> {
               dateTime: dateTime,
               filter: TransactionFilter.week,
               isShowDatePicker: false,
+              pageKey: "home",
+
             ),
             _buildListViewTitle(
                 leftTitle: 'LỊCH SỬ GIAO DỊCH TUẦN NÀY', rightTitle: ""),
@@ -188,6 +191,8 @@ class _HomeViewState extends State<HomeView> {
             dateTime: dateTime,
             filter: TransactionFilter.day,
             isShowDatePicker: true,
+              pageKey: "home",
+
           ),
           _buildListViewTitle(
               leftTitle: 'LỊCH SỬ GIAO DỊCH HÔM NAY', rightTitle: ""),

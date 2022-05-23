@@ -214,21 +214,31 @@ class _DataEntryViewState extends State<DataEntryView>
                         ),
                       ),
                     ),
-                    CateGoriesSeletor(
-                      categories: moneyCategories,
-                      parentKey: 'tab1',
-                      parentCallback: callBack,
-                      categoryType: 'category',
+                    BlocProvider(
+                      create: (context) =>
+                          CategoryCubit()..getCategories(type: 'output'),
+                      child: BlocBuilder<CategoryCubit, CategoryState>(
+                        builder: (context, state) {
+                          state.categories.forEach((element) {
+                            moneyCategories.update(element, (value) => value,
+                                ifAbsent: () => MyAppIcons.person);
+                          });
+
+                          return CateGoriesSeletor(
+                            categories: moneyCategories,
+                            parentKey: 'tab1',
+                            parentCallback: callBack,
+                            categoryType: 'category',
+                          );
+                        },
+                      ),
                     ),
                     Text(selectedCategory),
                     BlocBuilder<HomeBloc, HomeState>(
                       builder: (context, state) {
+                        print(state.allWallets);
                         if (state.allWallets!.isEmpty)
                           return CateGoriesSeletor(categories: {});
-
-                        // set default wallet and category
-                        allWalletInfor = state.allWallets;
-                        allTransactionInfor = state.allTransactions;
 
                         return CateGoriesSeletor(
                           categories: _mapWalletToCateGories(state.allWallets!),
@@ -352,11 +362,24 @@ class _DataEntryViewState extends State<DataEntryView>
                         ),
                       ),
                     ),
-                    CateGoriesSeletor(
-                      categories: inComeWallets,
-                      parentKey: 'tab2',
-                      parentCallback: callBack,
-                      categoryType: 'income',
+                    BlocProvider(
+                      create: (context) =>
+                          CategoryCubit()..getCategories(type: 'input'),
+                      child: BlocBuilder<CategoryCubit, CategoryState>(
+                        builder: (context, state) {
+                          state.categories.forEach((element) {
+                            inComeWallets.update(element, (value) => value,
+                                ifAbsent: () => MyAppIcons.person);
+                          });
+
+                          return CateGoriesSeletor(
+                            categories: inComeWallets,
+                            parentKey: 'tab2',
+                            parentCallback: callBack,
+                            categoryType: 'income',
+                          );
+                        },
+                      ),
                     ),
                     Text(selectedCategory),
                     BlocBuilder<HomeBloc, HomeState>(

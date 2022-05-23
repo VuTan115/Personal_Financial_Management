@@ -147,14 +147,16 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
                       ),
                     );
                   }).toList(),
-                  selectedItemBuilder: (context) {
-                    return widget.categories.keys.map((String value) {
-                      return ListTile(
-                        title: Text(value),
-                        leading: widget.categories[value],
-                      );
-                    }).toList();
-                  },
+                  selectedItemBuilder: widget.categories.isEmpty
+                      ? null
+                      : (context) {
+                          return widget.categories.keys.map((String value) {
+                            return ListTile(
+                              title: Text(value),
+                              leading: widget.categories[value],
+                            );
+                          }).toList();
+                        },
                 ),
               ),
             ),
@@ -170,11 +172,11 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
             create: (context) => CategoryCubit(),
             child: BlocBuilder<CategoryCubit, CategoryState>(
               builder: (context, state) {
-                if (state is CategoryCreating) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+                // if (state is CategoryCreating) {
+                //   return const Center(
+                //     child: CircularProgressIndicator(),
+                //   );
+                // }
                 return AlertDialog(
                   content: Stack(
                     clipBehavior: Clip.antiAlias,

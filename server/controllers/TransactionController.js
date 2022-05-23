@@ -213,10 +213,12 @@ const getFilteredTransaction = async (req, res) => {
       ])
     }
 
-    return res.status(200).json(transactions.map((element) => ({
-      ...element,
-      created_at: getDateForDart(element.created_at)
-    })))
+    return res.status(200).json(
+      transactions.map((element) => ({
+        ...element,
+        created_at: getDateForDart(element.created_at),
+      }))
+    )
   } catch (error) {
     console.log(error)
     return res.status(500).json('server error')

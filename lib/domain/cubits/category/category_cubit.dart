@@ -11,7 +11,6 @@ class CategoryCubit extends Cubit<CategoryState> {
     required String categoryName,
     required bool isOutput,
   }) async {
-    emit(CategoryCreating());
     final Category newCategory = await CategoryRepository().createCategory(
       name: categoryName,
       isOutput: isOutput,
@@ -20,9 +19,10 @@ class CategoryCubit extends Cubit<CategoryState> {
   }
 
   void getCategories({required String type}) async {
-    emit(CategoryFetching());
     final List<String> categories =
         await CategoryRepository().getCategories(type);
+    // print(categories);
+
     if (categories.isNotEmpty) {
       emit(state.copyWith(categories: categories));
     }

@@ -9,14 +9,16 @@ import 'package:personal_financial_management/app/utils/utils.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
 
 class MyDatePicker extends StatefulWidget {
-  MyDatePicker(
-      {Key? key,
-      required this.dateTime,
-      required this.isShowDatePicker,
-      required this.filter})
-      : super(key: key);
+  MyDatePicker({
+    Key? key,
+    required this.dateTime,
+    required this.isShowDatePicker,
+    required this.filter,
+    required this.pageKey,
+  }) : super(key: key);
   late DateTime? dateTime;
   bool isShowDatePicker;
+  final String pageKey;
   TransactionFilter filter;
   @override
   _MyDatePickerState createState() => _MyDatePickerState();
@@ -27,7 +29,6 @@ class _MyDatePickerState extends State<MyDatePicker> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _today = DateTime.now();
   }
@@ -148,10 +149,7 @@ class _MyDatePickerState extends State<MyDatePicker> {
                     : (widget.filter == TransactionFilter.week)
                         ? _today.subtract(Duration(days: 7))
                         : _today.subtract(Duration(days: 1));
-                BlocProvider.of<HomeBloc>(context).add(
-                  HomeSubscriptionRequestedWithFilter(
-                      date: _today, filter: widget.filter),
-                );
+                homeBlocCall(date: _today, filter: widget.filter);
               });
             }),
         IconButton(
@@ -164,14 +162,21 @@ class _MyDatePickerState extends State<MyDatePicker> {
                   : (widget.filter == TransactionFilter.week)
                       ? _today.add(Duration(days: 7))
                       : _today.add(Duration(days: 1));
-              BlocProvider.of<HomeBloc>(context).add(
-                HomeSubscriptionRequestedWithFilter(
-                    date: _today, filter: widget.filter),
-              );
+              homeBlocCall(date: _today, filter: widget.filter);
             });
           },
         ),
       ],
     );
+  }
+
+  void homeBlocCall(
+      {required DateTime date, required TransactionFilter filter}) {
+    if (widget.pageKey == 'home') {
+      BlocProvider.of<HomeBloc>(context).add(
+        HomeSubscriptionRequestedWithFilter(
+            date: _today, filter: widget.filter),
+      );
+    }
   }
 }
