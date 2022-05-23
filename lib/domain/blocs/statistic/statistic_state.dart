@@ -32,3 +32,5 @@ class StatisticState extends Equatable {
 class StatisticInitial extends StatisticState {}
 
 class StatisticCategoryUpdated extends StatisticState {}
+
+class StatisticToTalBudgetCreated extends StatisticState {}

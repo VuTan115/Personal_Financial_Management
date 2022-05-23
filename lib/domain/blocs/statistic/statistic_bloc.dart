@@ -8,8 +8,9 @@ part 'statistic_state.dart';
 class StatisticBloc extends Bloc<StatisticEvent, StatisticState> {
   StatisticBloc() : super(StatisticInitial()) {
     on<StatisticLoadData>(_onStatisticLoadData);
-    on<StatisticUpdateCategory>(_onStatisticUpdateCategory);
-    on<StatisticCreateCategory>(_onStatisticCreateCategory);
+    on<StatisticUpdateCategory>(_onUpdateCategory);
+    on<StatisticCreateCategory>(_onCreateCategory);
+    on<StatisticCreateTotalBudget>(_onCreateTotalBudget);
   }
 
   void _onStatisticLoadData(
@@ -29,7 +30,7 @@ class StatisticBloc extends Bloc<StatisticEvent, StatisticState> {
         dateTime: event.dateTime.toString()));
   }
 
-  void _onStatisticUpdateCategory(
+  void _onUpdateCategory(
       StatisticUpdateCategory event, Emitter<StatisticState> emit) async {
     print("supppp${state}");
     final Map<String, dynamic> budgetDetail =
@@ -46,7 +47,7 @@ class StatisticBloc extends Bloc<StatisticEvent, StatisticState> {
         dateTime: event.dateTime.toString()));
   }
 
-  void _onStatisticCreateCategory(
+  void _onCreateCategory(
       StatisticCreateCategory event, Emitter<StatisticState> emit) async {
     print("state Date${event}");
     final String budgetDetail = await BudgetRepository().createCategoryBudget(
@@ -56,5 +57,16 @@ class StatisticBloc extends Bloc<StatisticEvent, StatisticState> {
     );
     print(budgetDetail);
     emit(StatisticCategoryUpdated());
+  }
+
+  void _onCreateTotalBudget(
+      StatisticCreateTotalBudget event, Emitter<StatisticState> emit) async {
+    final res = await BudgetRepository().createTotalBudget(
+      timestamp: event.dateTime,
+      amount: event.amount,
+    );
+
+    print(res);
+    emit(StatisticToTalBudgetCreated());
   }
 }

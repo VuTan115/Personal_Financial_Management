@@ -78,7 +78,6 @@ class _StatisticViewState extends State<StatisticView> {
               child: CircularProgressIndicator(),
             );
           }
-
           if (state.data.isNotEmpty) {
             dummyData.update(
                 'totalBudget', (value) => state.data['totalBudget']);
@@ -105,17 +104,29 @@ class _StatisticViewState extends State<StatisticView> {
                         constraints: const BoxConstraints(maxHeight: 400),
                         child: StatisticChart(
                           titleChart: Text("Ngân sách"),
-                          amountChart: Text(
-                            dummyData['totalBudget'] < 0
-                                ? "Chưa thiết lập"
-                                : numberFormat.format(dummyData['totalBudget']),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 30,
-                              color: MyAppColors.gray900,
-                              overflow: TextOverflow.clip,
-                            ),
-                          ),
+                          amountChart: dummyData['totalBudget'] < 0
+                              ? InkWell(
+                                  onTap: () {
+                                    showTotalBudgetSetter();
+                                  },
+                                  child: const Text(
+                                    'Chưa thiết lâp',
+                                    style: TextStyle(
+                                      fontSize: 30,
+                                      color: MyAppColors.gray900,
+                                      overflow: TextOverflow.clip,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  numberFormat.format(dummyData['totalBudget']),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 30,
+                                    color: MyAppColors.gray900,
+                                    overflow: TextOverflow.clip,
+                                  ),
+                                ),
                           totalBudget: dummyData['totalBudget'],
                           data: dummyData['categories'],
                         ),
@@ -135,11 +146,11 @@ class _StatisticViewState extends State<StatisticView> {
                                 dummyData['categories'].elementAt(index);
                             return ListTile(
                               onTap: () {
-                                onCategoryTap(element['_id']);
+                                showCategorySetter(element['_id']);
                               },
                               leading: generateCategoryIcon(element['name']),
                               title: Text(element['name'] ?? 'Danh mục tự do'),
-                              subtitle: Text(element['budget'] < 0
+                              subtitle: Text(element['spent'] < 0
                                   ? 'Chưa chi tiêu'
                                   : "Đã tiêu ${numberFormat.format(element['spent'])}"),
                               trailing: element['budget'] > 0
@@ -172,7 +183,7 @@ class _StatisticViewState extends State<StatisticView> {
     );
   }
 
-  void onCategoryTap(String categoryId) {
+  void showCategorySetter(String categoryId) {
     TextEditingController _newCategoryName = TextEditingController();
 
     showDialog(
@@ -314,6 +325,145 @@ class _StatisticViewState extends State<StatisticView> {
           element['budget'] = int.parse(budget);
         }
       });
+    });
+    Navigator.of(context).pop();
+  }
+
+  void showTotalBudgetSetter() {
+    TextEditingController _newTotalBudget = TextEditingController();
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Stack(
+              clipBehavior: Clip.antiAlias,
+              children: <Widget>[
+                Positioned(
+                  right: -40.0,
+                  top: -40.0,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                          color: MyAppColors.accent700,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              width: 1, color: MyAppColors.accent800)),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Expanded(
+                    child: Form(
+                      // key: _formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            TextFormField(
+                              controller: _newTotalBudget,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'[0-9]')),
+                              ],
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: const OutlineInputBorder(),
+                                focusColor: MyAppColors.accent800,
+                                focusedBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: MyAppColors.accent800,
+                                        width: 1)),
+                                labelText: 'Thiết lập ngân sách ',
+                                hintText: 'Nhập số tiền',
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 26),
+                                  child: MyAppIcons.vnd,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: Center(
+                                  child: Padding(
+                                padding: const EdgeInsets.all(0.0),
+                                child: BlocProvider(
+                                  create: (context) => StatisticBloc(),
+                                  child: BlocBuilder<StatisticBloc,
+                                      StatisticState>(
+                                    builder: (statisticContext, state) {
+                                      return ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            elevation: 4,
+                                            primary: MyAppColors.accent800,
+                                            alignment: Alignment.center),
+                                        onPressed: () {
+                                          onTotalBudgetSave(
+                                            context: statisticContext,
+                                            budget: _newTotalBudget.text,
+                                          );
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: const [
+                                              Text(
+                                                'THIẾT LẬP',
+                                                style: TextStyle(
+                                                  color: MyAppColors.white000,
+                                                  fontSize: 20,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              )),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void onTotalBudgetSave({
+    required BuildContext context,
+    required String budget,
+    // required String categoryId,
+  }) {
+    // BlocProvider.of<StatisticBloc>(context).add(
+    //   StatisticCreateTotalBudget(
+    //     amount: int.parse(budget),
+    //     dateTime: DateTime.parse(_currentDate),
+    //   ),
+    // );
+    print(budget);
+    setState(() {
+      dummyData['totalBudget'] = budget;
     });
     Navigator.of(context).pop();
   }

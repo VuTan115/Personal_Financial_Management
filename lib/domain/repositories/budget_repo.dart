@@ -59,7 +59,7 @@ class BudgetRepository {
   }
 
   Future<Map<String, dynamic>> createTotalBudget(
-      DateTime timestamp, num amount) async {
+      {required DateTime timestamp, required num amount}) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<Map<String, dynamic>> res = await Dio().post(
