@@ -22,7 +22,6 @@ class CategoryRepository {
 
       List<String>? result = res.data!.map((e) => e as String).toList();
 
-      print(result);
       return result;
     } catch (error) {
       throw error;
@@ -38,7 +37,6 @@ class CategoryRepository {
           options: Options(headers: {'AuthToken': token}),
           data: jsonEncode({"name": name, "is_output": isOutput}));
       Map<String, dynamic>? result = res.data;
-      print(result);
       return Category.fromJson(result!);
     } catch (error) {
       throw error;

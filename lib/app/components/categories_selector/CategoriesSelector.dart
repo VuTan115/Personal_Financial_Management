@@ -51,7 +51,6 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.categoryType);
     return Container(
       margin: const EdgeInsets.only(top: 40),
       decoration: BoxDecoration(

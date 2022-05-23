@@ -21,7 +21,6 @@ class CategoryCubit extends Cubit<CategoryState> {
   void getCategories({required String type}) async {
     final List<String> categories =
         await CategoryRepository().getCategories(type);
-    // print(categories);
 
     if (categories.isNotEmpty) {
       emit(state.copyWith(categories: categories));

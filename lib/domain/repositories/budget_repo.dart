@@ -22,13 +22,13 @@ class BudgetRepository {
     }
   }
 
-  Future<Map<String, dynamic>> getBudgetDetail(String type) async {
+  Future<Map<String, dynamic>> getBudgetDetail(DateTime timestamp) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<Map<String, dynamic>> res = await Dio().get(
           '$IPAddressTan/api/budget/detail',
           options: Options(headers: {'AuthToken': token}),
-          queryParameters: {'is_output': type});
+          queryParameters: {'timestamp': timestamp.toString()});
       Map<String, dynamic>? result = res.data;
       return result!;
     } catch (error) {

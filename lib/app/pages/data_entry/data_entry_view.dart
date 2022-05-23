@@ -236,7 +236,6 @@ class _DataEntryViewState extends State<DataEntryView>
                     Text(selectedCategory),
                     BlocBuilder<HomeBloc, HomeState>(
                       builder: (context, state) {
-                        print(state.allWallets);
                         if (state.allWallets!.isEmpty)
                           return CateGoriesSeletor(categories: {});
 

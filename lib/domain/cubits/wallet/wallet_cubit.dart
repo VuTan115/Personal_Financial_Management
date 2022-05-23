@@ -34,6 +34,5 @@ class WalletCubit extends Cubit<WalletState> {
       type,
       description,
     );
-    print(newWallet);
   }
 }

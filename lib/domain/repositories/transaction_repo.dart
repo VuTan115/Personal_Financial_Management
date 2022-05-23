@@ -58,7 +58,6 @@ class TransactionRepository {
     String wallet,
     DateTime created_at,
   ) async {
-    print("createTransaction ${category}");
     String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
     var data = {
       "amount": amount,

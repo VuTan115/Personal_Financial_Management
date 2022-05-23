@@ -68,15 +68,18 @@ class _StatisticViewState extends State<StatisticView> {
           dateTime: DateTime.now(),
         )),
       child: BlocBuilder<StatisticBloc, StatisticState>(
+        // buildWhen: (previous, current) => previous.status != current.status,
         builder: (context, state) {
           if (state.status == StatisticStatus.loading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
+
           if (state.data.isNotEmpty) {
             dummyData.update(
                 'totalBudget', (value) => state.data['totalBudget']);
+            dummyData.update('categories', (value) => state.data['categories']);
           }
           return Scaffold(
             body: Center(
@@ -95,8 +98,18 @@ class _StatisticViewState extends State<StatisticView> {
                         color: Colors.white,
                         height: 300,
                         constraints: const BoxConstraints(maxHeight: 400),
-                        child: const StatisticChart(
+                        child: StatisticChart(
                           titleChart: Text("Ngân sách"),
+                          amountChart: Text(
+                            "${numberFormat.format(dummyData['totalBudget'])}",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 30,
+                              color: MyAppColors.gray900,
+                              overflow: TextOverflow.clip,
+                            ),
+                          ),
+                          data: dummyData['categories'],
                         ),
                       ),
                       Expanded(
@@ -114,18 +127,15 @@ class _StatisticViewState extends State<StatisticView> {
                                 dummyData['categories'].elementAt(index);
                             return ListTile(
                               onTap: () {
-                                print(element['id']);
+                                print(element['_id']);
                               },
                               leading: generateCategoryIcon(element['name']),
                               title: Text(element['name'] ?? 'Danh mục tự do'),
                               subtitle: Text(element['budget'] == 0
                                   ? 'Chưa chi tiêu'
-                                  : element['spend'] /
-                                          element['budget'] *
-                                          100.toStringAsFixed(2) +
-                                      '%'),
+                                  : "Đã tiêu ${numberFormat.format(element['spent'])}"),
                               trailing: Text(
-                                  '- ${numberFormat.format(element['budget'])} đ'),
+                                  '${numberFormat.format(element['budget'])} đ'),
                             );
                           }),
                           separatorBuilder: (context, index) {

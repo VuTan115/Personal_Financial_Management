@@ -8,11 +8,15 @@ import 'package:personal_financial_management/app/utils/extentsions.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
 
 class StatisticChart extends StatefulWidget {
-  const StatisticChart({
-    Key? key,
-    required this.titleChart,
-  }) : super(key: key);
+  const StatisticChart(
+      {Key? key,
+      required this.titleChart,
+      required this.amountChart,
+      this.data})
+      : super(key: key);
   final Widget titleChart;
+  final Widget amountChart;
+  final data;
 
   @override
   State<StatefulWidget> createState() => StatisticChartState();
@@ -20,24 +24,30 @@ class StatisticChart extends StatefulWidget {
 
 class StatisticChartState extends State<StatisticChart> {
   int touchedIndex = 100;
-  Map<String, String> _data = {
-    "Ăn uống": "0",
-    "Giáo dục": "0",
-    "Nhu yếu phẩm": "0",
-    "Quà cáp": "0",
-    "Làm đẹp": "0",
-    "Nhà ở": "0",
-    "Giải trí": "0",
-    "Di chuyển": "0",
-  };
+
   Map<String, String> _dummyData = {
     "Ăn uống": "40",
     "Giáo dục": "30",
     "Nhu yếu phẩm": "30",
   };
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // print(widget.titleChart);
+    widget.data.forEach((e) {
+      print("${(e['spent'] / e['budget']).toStringAsFixed(2)}");
+      if (e['budget'] > 0 && (e['spent'] / e['budget']) < 1) {
+        _dummyData.update(
+          e['name'],
+          (value) => "${(e['spent'] / e['budget'] * 100).toStringAsFixed(2)}",
+          ifAbsent: () => "${(e['spent'] / e['budget'] * 100)}",
+        );
+      }
+    });
+
     return Container(
       color: Colors.transparent,
       child: Stack(
@@ -78,15 +88,7 @@ class StatisticChartState extends State<StatisticChart> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 widget.titleChart,
-                Text(
-                  numberFormat.format(30000000),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: MyAppColors.gray900,
-                    overflow: TextOverflow.clip,
-                  ),
-                )
+                widget.amountChart,
               ],
             ),
           )),
@@ -160,6 +162,8 @@ class StatisticChartState extends State<StatisticChart> {
       //   default:
       //     throw 'Oh no';
       // }
+
+      // if(_dummyData)
       return PieChartSectionData(
         color: generateCategoryColor(_dummyData.keys.elementAt(i)),
         value: double.parse(_dummyData.values.elementAt(i)),

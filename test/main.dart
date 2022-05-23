@@ -8,34 +8,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_financial_management/app/pages/login_page.dart';
+import 'package:personal_financial_management/test.dart';
 
 void main() {
   testWidgets('Login page', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
-    expect(find.text('Đăng nhập'), findsNothing);
-  });
-  testWidgets('Resgiter page', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
-    expect(find.text('Đăng nhập'), findsNothing);
-  });
-  testWidgets('Home page', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
-    expect(find.text('Đăng nhập'), findsNothing);
-  });
-  testWidgets('Detail page', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
-    expect(find.text('Đăng nhập'), findsNothing);
-  });
-  testWidgets('Data Entry page', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
-    expect(find.text('Đăng nhập'), findsNothing);
-  });
-  testWidgets('Statistic page', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
-    expect(find.text('Đăng nhập'), findsNothing);
-  });
-  testWidgets('Statistic page', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+    await tester.pumpWidget(const MaterialApp(home: Test()));
     expect(find.text('Đăng nhập'), findsNothing);
   });
 }
