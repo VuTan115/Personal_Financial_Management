@@ -92,7 +92,7 @@ class _MyAppState extends State<MyApp> {
                   switch (state.status) {
                     case AuthenticationStatus.unauthenticated:
                       _navigator.pushNamedAndRemoveUntil(
-                        AppRoute.home,
+                        AppRoute.login,
                         (Route<dynamic> route) => false,
                       );
                       break;

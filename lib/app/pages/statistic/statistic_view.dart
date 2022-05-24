@@ -64,6 +64,7 @@ class _StatisticViewState extends State<StatisticView> {
   };
   String _selectedDateString = 'Chọn ngày';
   late String _currentDate;
+  String newTotalBudget = '';
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -83,8 +84,14 @@ class _StatisticViewState extends State<StatisticView> {
                 'totalBudget', (value) => state.data['totalBudget']);
             dummyData.update('categories', (value) => state.data['categories']);
           }
+
           print(state.dateTime);
           _currentDate = (state.dateTime);
+
+          if (newTotalBudget != '') {
+            dummyData.update(
+                'totalBudget', (value) => int.parse(newTotalBudget));
+          }
           return Scaffold(
             body: Center(
               child: Container(
@@ -455,15 +462,14 @@ class _StatisticViewState extends State<StatisticView> {
     required String budget,
     // required String categoryId,
   }) {
-    // BlocProvider.of<StatisticBloc>(context).add(
-    //   StatisticCreateTotalBudget(
-    //     amount: int.parse(budget),
-    //     dateTime: DateTime.parse(_currentDate),
-    //   ),
-    // );
-    print(budget);
+    BlocProvider.of<StatisticBloc>(context).add(
+      StatisticCreateTotalBudget(
+        amount: int.parse(budget),
+        dateTime: DateTime.parse(_currentDate),
+      ),
+    );
     setState(() {
-      dummyData['totalBudget'] = budget;
+      newTotalBudget = budget;
     });
     Navigator.of(context).pop();
   }

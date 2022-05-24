@@ -33,4 +33,13 @@ class StatisticInitial extends StatisticState {}
 
 class StatisticCategoryUpdated extends StatisticState {}
 
-class StatisticToTalBudgetCreated extends StatisticState {}
+class StatisticToTalBudgetCreated extends StatisticState {
+  StatisticToTalBudgetCreated(
+      {this.status = StatisticStatus.created, this.totalBudget = ''});
+
+  final StatisticStatus status;
+  final String totalBudget;
+
+  @override
+  List<Object> get props => [status, totalBudget];
+}
