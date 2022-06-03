@@ -12,6 +12,7 @@ import 'package:personal_financial_management/app/routes/app_routes.dart';
 import 'package:personal_financial_management/app/utils/utils.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
 import 'package:personal_financial_management/domain/blocs/page_route/page_route_bloc.dart';
+import 'package:personal_financial_management/domain/cubits/category/category_cubit.dart';
 import 'package:personal_financial_management/domain/repositories/budget_repo.dart';
 import 'package:personal_financial_management/domain/repositories/repositories.dart';
 import 'package:personal_financial_management/domain/repositories/transaction_repo.dart';
@@ -45,32 +46,19 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     BlocProvider.of<HomeBloc>(context).add(const HomeSubscriptionRequested());
-    return MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider.value(value: transactionRepository),
-          RepositoryProvider.value(value: budgetRepository),
-        ],
-        child: MultiBlocProvider(
-          providers: [
-            BlocProvider<HomeBloc>(
-              create: (context) => HomeBloc(
-                  transactionRepository: transactionRepository,
-                  budgetRepository: budgetRepository,
-                  walletRepository: walletRepository)
-                ..add(const HomeSubscriptionRequested()),
-            )
-          ],
-          child: BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              if (state.status == HomeStatus.loading) {
-                // return Center(
-                //   child: CircularProgressIndicator(),
-                // );
-              }
-              return _buildTabBar();
-            },
-          ),
-        ));
+    return BlocBuilder<HomeBloc, HomeState>(
+      buildWhen: (previous, current) =>
+          previous.runtimeType != current.runtimeType,
+      builder: (context, state) {
+        if (state.status == HomeStatus.loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        return _buildTabBar();
+      },
+    );
   }
 
   // Widgets
@@ -156,6 +144,7 @@ class _HomeViewState extends State<HomeView> {
               dateTime: dateTime,
               filter: TransactionFilter.month,
               isShowDatePicker: false,
+              pageKey: "home",
             ),
             BlocBuilder<HomeBloc, HomeState>(
               builder: (context, state) {
@@ -175,7 +164,7 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildWeekTabView() {
     return Container(
-        color: Colors.transparent,
+        color: Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -183,6 +172,8 @@ class _HomeViewState extends State<HomeView> {
               dateTime: dateTime,
               filter: TransactionFilter.week,
               isShowDatePicker: false,
+              pageKey: "home",
+
             ),
             _buildListViewTitle(
                 leftTitle: 'LỊCH SỬ GIAO DỊCH TUẦN NÀY', rightTitle: ""),
@@ -200,6 +191,8 @@ class _HomeViewState extends State<HomeView> {
             dateTime: dateTime,
             filter: TransactionFilter.day,
             isShowDatePicker: true,
+              pageKey: "home",
+
           ),
           _buildListViewTitle(
               leftTitle: 'LỊCH SỬ GIAO DỊCH HÔM NAY', rightTitle: ""),
@@ -337,7 +330,7 @@ class _HomeViewState extends State<HomeView> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ListTile(
         onTap: () {},
-        leading: generateIcon(title),
+        leading: generateCategoryIcon(title),
         title: Text(title),
         subtitle: Text(subtitle),
         trailing: Text(
@@ -353,8 +346,8 @@ class _HomeViewState extends State<HomeView> {
   Widget _buildHistoryExpense({String filter = ''}) {
     return Expanded(
       child: BlocBuilder<HomeBloc, HomeState>(
-        buildWhen: (previous, current) =>
-            previous.transactionMap![filter] != current.transactionMap![filter],
+        // buildWhen: (previous, current) =>
+        //     previous.transactionMap![filter] != current.transactionMap![filter],
         builder: (context, state) {
           if (state.transactionMap![filter] == null) {
             return const Center(

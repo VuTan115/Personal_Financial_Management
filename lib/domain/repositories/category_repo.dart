@@ -14,26 +14,30 @@ class CategoryRepository {
   Future<List<String>> getCategories(String type) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
-      Response<List<String>> res = await Dio().get('$IPAddress/api/category',
-          options: Options(headers: {'AuthToken': token}),
-          queryParameters: {'is_output': type});
-      List<String>? result = res.data;
-      return result!;
+      Response<List>? res = await Dio().get(
+        '$IPAddressTan/api/category',
+        options: Options(headers: {'AuthToken': token}),
+        queryParameters: {'is_output': type},
+      );
+
+      List<String>? result = res.data!.map((e) => e as String).toList();
+
+      return result;
     } catch (error) {
       throw error;
     }
   }
 
-  Future<Map<String, dynamic>> createCategory(
-      String name, bool isOutput) async {
+  Future<Category> createCategory(
+      {required String name, required bool isOutput}) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<Map<String, dynamic>> res = await Dio().post(
-          '$IPAddress/api/category',
+          '$IPAddressTan/api/category',
           options: Options(headers: {'AuthToken': token}),
           data: jsonEncode({"name": name, "is_output": isOutput}));
-      Map<String, dynamic> result = res.data!;
-      return result;
+      Map<String, dynamic>? result = res.data;
+      return Category.fromJson(result!);
     } catch (error) {
       throw error;
     }

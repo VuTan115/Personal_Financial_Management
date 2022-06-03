@@ -5,73 +5,40 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:personal_financial_management/app/application.dart';
+import 'package:personal_financial_management/app/pages/data_entry/data_entry_view.dart';
+import 'package:personal_financial_management/app/pages/detail/detail_view.dart';
+import 'package:personal_financial_management/app/pages/home/home_view.dart';
 import 'package:personal_financial_management/app/pages/login_page.dart';
-import 'package:personal_financial_management/app/routes/app_routes.dart';
-import 'package:personal_financial_management/app/utils/global_key.dart';
-import 'package:personal_financial_management/domain/blocs/auth_bloc/authentication_bloc.dart';
-import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
-import 'package:personal_financial_management/domain/repositories/budget_repo.dart';
-import 'package:personal_financial_management/domain/repositories/repositories.dart';
-import 'package:personal_financial_management/domain/repositories/user_repo.dart';
-
-// Widget returnTestable(Widget widget) {
-//   AuthenticationRepository authenticationRepository =
-//       new AuthenticationRepository();
-//   UserRepository userRepository = new UserRepository();
-//   TransactionRepository transactionRepository = new TransactionRepository();
-//   BudgetRepository budgetRepository = new BudgetRepository();
-//   WalletRepository walletRepository = new WalletRepository();
-//   return M
-// return MultiRepositoryProvider(
-//     providers: [
-//       RepositoryProvider.value(value: authenticationRepository),
-//       RepositoryProvider.value(value: transactionRepository),
-//       RepositoryProvider.value(value: budgetRepository),
-//       RepositoryProvider.value(value: walletRepository),
-//     ],
-//     child: MultiBlocProvider(
-//       providers: [
-//         BlocProvider<AuthenticationBloc>(
-//             create: (_) => AuthenticationBloc(
-//                 authenticationRepository: authenticationRepository,
-//                 userRepository: userRepository)),
-//         BlocProvider<HomeBloc>(
-//             create: (context) => HomeBloc(
-//                 transactionRepository: transactionRepository,
-//                 budgetRepository: budgetRepository,
-//                 walletRepository: walletRepository))
-//       ],
-//       child: MaterialApp(
-//         // key: _navigatorKey,
-//         //only show on recently opened app
-//         home: widget,
-//       ),
-//     ));
-// }
+import 'package:personal_financial_management/app/pages/wallet/add_wallet.dart';
+import 'package:personal_financial_management/app/pages/wallet/wallet_view.dart';
+import 'package:personal_financial_management/test.dart';
 
 void main() {
-  testWidgets('Check full display', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(
-      home: LoginPage(),
-    ));
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('Login page', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Test()));
+  });
+  testWidgets('Detail page', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Test()));
+  });
+  testWidgets('Statistic page', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+    expect(find.text('Đăng nhập'), findsWidgets);
+  });
+  testWidgets('Login page', (WidgetTester tester) async {
+    await tester.pumpWidget( MaterialApp(home: DetailView()));
+  });
+  testWidgets('Data Entry page', (WidgetTester tester) async {
+    await tester.pumpWidget( MaterialApp(home: DataEntryView()));
+  });
+  testWidgets('Home page', (WidgetTester tester) async {
+    await tester.pumpWidget( MaterialApp(home: HomeView()));
+  });
+  testWidgets('Wallet page', (WidgetTester tester) async {
+    await tester.pumpWidget( MaterialApp(home: WalletView()));
+  });
+  testWidgets('AddWallet page', (WidgetTester tester) async {
+    await tester.pumpWidget( MaterialApp(home: AddWallet()));
   });
 }

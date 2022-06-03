@@ -61,7 +61,8 @@ class _MyAppState extends State<MyApp> {
                 create: (context) => HomeBloc(
                     transactionRepository: transactionRepository,
                     budgetRepository: budgetRepository,
-                    walletRepository: walletRepository))
+                    walletRepository: walletRepository)
+                  ..add(const HomeSubscriptionRequested()))
           ],
           child: MaterialApp(
             // key: _navigatorKey,
@@ -91,7 +92,7 @@ class _MyAppState extends State<MyApp> {
                   switch (state.status) {
                     case AuthenticationStatus.unauthenticated:
                       _navigator.pushNamedAndRemoveUntil(
-                        AppRoute.home,
+                        AppRoute.login,
                         (Route<dynamic> route) => false,
                       );
                       break;

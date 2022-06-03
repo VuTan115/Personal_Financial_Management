@@ -14,7 +14,7 @@ class TransactionRepository {
       DateTime qTimestamp, TransactionFilter filter) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
-      Response<List> res = await Dio().get('$IPAddress/api/transaction',
+      Response<List> res = await Dio().get('$IPAddressTan/api/transaction',
           options: Options(headers: {'AuthToken': token}),
           queryParameters: {
             'timestamp': qTimestamp.toString(),
@@ -30,7 +30,8 @@ class TransactionRepository {
   Future<List<t.Transaction>> getWalletTransactions(String wallet_id) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
-      Response<List> res = await Dio().get('$IPAddress/api/transaction/wallet',
+      Response<List> res = await Dio().get(
+          '$IPAddressTan/api/transaction/wallet',
           options: Options(headers: {'AuthToken': token}),
           queryParameters: {'wallet_id': wallet_id});
       List? arr = res.data;
@@ -43,7 +44,7 @@ class TransactionRepository {
   Future<List<t.Transaction>> getAllTransactions() async {
     String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
     Response<List> res = await Dio().get(
-      '$IPAddress/api/transaction/all',
+      '$IPAddressTan/api/transaction/all',
       options: Options(headers: {'AuthToken': token}),
     );
     List? arr = res.data;
@@ -55,16 +56,18 @@ class TransactionRepository {
     bool is_output,
     String category,
     String wallet,
+    DateTime created_at,
   ) async {
     String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
     var data = {
       "amount": amount,
       "is_output": is_output,
       "category": category,
-      "wallet": wallet
+      "wallet": wallet,
+      "created_at": created_at.toString(),
     };
     Response<Map<String, dynamic>> res = await Dio().post(
-        '$IPAddress/api/transaction',
+        '$IPAddressTan/api/transaction',
         options: Options(headers: {'AuthToken': token}),
         data: jsonEncode(data));
     Map<String, dynamic>? json = res.data;

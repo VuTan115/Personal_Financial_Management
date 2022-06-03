@@ -14,10 +14,11 @@ class Category extends Equatable {
     this.isOutput,
   });
   factory Category.fromJson(Map<String, dynamic> json) => Category(
-      id: json["id"],
-      name: json["name"],
-      isOutput: json["is_output"],
-      user_id: json["user_id"]);
+        id: json["_id"],
+        name: json["name"],
+        isOutput: json["is_output"],
+        user_id: json["user_id"],
+      );
   Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,

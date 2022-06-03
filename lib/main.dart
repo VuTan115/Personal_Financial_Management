@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
-import 'package:personal_financial_management/app/application.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:personal_financial_management/app/observers/bloc_observer_extend.dart';
-import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:personal_financial_management/app/application.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +13,6 @@ void main() async {
         projectId: "personal-financel-app",
         authDomain: 'personal-financel-app.firebaseapp.com'),
   );
-  Bloc.observer = BlocObserverExtend();
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }

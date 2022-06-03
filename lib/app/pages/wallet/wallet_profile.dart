@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/components/images/my_images.dart';
 import 'package:personal_financial_management/app/components/widgets/ListViewTitle.dart';
 import 'package:personal_financial_management/app/utils/assets.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
+import 'package:personal_financial_management/domain/cubits/wallet/wallet_cubit.dart';
+
 import 'package:personal_financial_management/domain/models/wallet.dart';
 
 class WalletProfile extends StatefulWidget {
@@ -19,8 +22,7 @@ class WalletProfile extends StatefulWidget {
 class _WalletProfileState extends State<WalletProfile> {
   @override
   Widget build(BuildContext context) {
-    print(widget.walletInfo);
-
+    context.read<WalletCubit>().getWalletTransactions(widget.walletInfo.id);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -85,7 +87,11 @@ class _WalletProfileState extends State<WalletProfile> {
                 ],
               ),
             ),
-            _buildWalletHistory(),
+            Row(
+              children: [
+                Expanded(child: _buildWalletHistory()),
+              ],
+            ),
           ],
         ),
       ),
@@ -93,15 +99,42 @@ class _WalletProfileState extends State<WalletProfile> {
   }
 
   Widget _buildWalletHistory() {
-    return Container(
-      child: Column(
-        children: [
-          BuildListViewTitle(
-            leftTitle: 'Tháng 5',
-            rightTitle: '',
-          )
-        ],
-      ),
+    return BlocBuilder<WalletCubit, WalletState>(
+      builder: (context, state) {
+        if (state.walletTransitions.isEmpty) {
+          //return loading indicator
+          return const SizedBox(
+            height: 200,
+            child: Center(
+              child: Text('Không có giao dịch nào gần đây'),
+            ),
+          );
+        }
+        return Expanded(
+          child: Column(
+            children: [
+              BuildListViewTitle(
+                leftTitle: 'Lịch sử giao dịch',
+                rightTitle: '',
+              ),
+              ListView.separated(
+                shrinkWrap: true,
+                itemBuilder: ((context, index) {
+                  final element = state.walletTransitions[index];
+                  return buildListTileExpense(
+                    amount: element.amount.toString(),
+                    title: element.categoryName,
+                    subtitle: element.createdAt.toString(),
+                    isOutPut: element.is_output,
+                  );
+                }),
+                separatorBuilder: (context, index) => const Divider(height: 1),
+                itemCount: state.walletTransitions.length,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

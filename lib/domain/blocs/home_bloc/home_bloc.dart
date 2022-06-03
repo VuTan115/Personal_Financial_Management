@@ -31,44 +31,47 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeSubscriptionRequested event,
     Emitter<HomeState> emit,
   ) async {
-    try {
-      emit(state.copyWith(status: () => HomeStatus.loading));
-      List<t.Transaction> transactions = await _transactionRepository
-          .getTransactions(DateTime.now(), state.filter);
-      List<t.Transaction> todayTransactions = await _transactionRepository
-          .getTransactions(DateTime.now(), TransactionFilter.day);
-      List<t.Transaction> weekTransactions = await _transactionRepository
-          .getTransactions(DateTime.now(), TransactionFilter.week);
-      List<t.Transaction> monthTransactions = await _transactionRepository
-          .getTransactions(DateTime.now(), TransactionFilter.month);
-      todayTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      weekTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      monthTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      Map<String, dynamic> allWallets = await _walletRepository.getAllWallets();
+    emit(state.copyWith(status: () => HomeStatus.loading));
+    List<t.Transaction> transactions = await _transactionRepository
+        .getTransactions(DateTime.now(), state.filter);
 
-      Map<String, List<t.Transaction>>? transactionMap = {
-        "day": todayTransactions,
-        "week": weekTransactions,
-        "month": monthTransactions,
-      };
-      List<t.Transaction> allTransactions =
-          await _transactionRepository.getAllTransactions();
-      Map<String, dynamic> budget =
-          await _budgetRepository.getMonthlyBudget(DateTime.now());
-      allTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      transactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      emit(state.copyWith(
-        status: () => HomeStatus.success,
-        transactions: () => transactions,
-        totalBudget: () => budget["totalBudget"],
-        allTransactions: () => allTransactions,
-        allWallets: allWallets,
-        transactionMap: transactionMap,
-        spent: () => budget["spent"],
-      ));
-    } catch (e) {
-      print(e);
-    }
+    List<t.Transaction> todayTransactions = await _transactionRepository
+        .getTransactions(DateTime.now(), TransactionFilter.day);
+
+    List<t.Transaction> weekTransactions = await _transactionRepository
+        .getTransactions(DateTime.now(), TransactionFilter.week);
+
+    List<t.Transaction> monthTransactions = await _transactionRepository
+        .getTransactions(DateTime.now(), TransactionFilter.month);
+
+    todayTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    weekTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    monthTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    Map<String, dynamic> allWallets = await _walletRepository.getAllWallets();
+    List<t.Transaction> walletTransactions = await _transactionRepository
+        .getWalletTransactions('62850f110946e496d4fba97f');
+    Map<String, List<t.Transaction>>? transactionMap = {
+      "day": todayTransactions,
+      "week": weekTransactions,
+      "month": monthTransactions,
+    };
+    List<t.Transaction> allTransactions =
+        await _transactionRepository.getAllTransactions();
+    Map<String, dynamic> budget =
+        await _budgetRepository.getMonthlyBudget(DateTime.now());
+
+    allTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    transactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    emit(state.copyWith(
+      status: () => HomeStatus.success,
+      transactions: () => transactions,
+      totalBudget: () => budget["totalBudget"],
+      allTransactions: () => allTransactions,
+      allWallets: allWallets,
+      transactionMap: transactionMap,
+      spent: () => budget["spent"],
+    ));
   }
 
   void _onDateChange(

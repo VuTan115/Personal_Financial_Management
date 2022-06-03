@@ -19,7 +19,7 @@ int getDaysInMonth(int year, int month) {
   return DateTime(year, month + 1).difference(DateTime(year, month)).inDays;
 }
 
-Widget generateIcon(String name) {
+Widget generateCategoryIcon(String name) {
   switch (name) {
     case 'Xăng xe':
       return MyAppIcons.build;
@@ -48,6 +48,24 @@ Widget generateIcon(String name) {
   }
 }
 
+Widget generateWalletIcon(String name) {
+  switch (name) {
+    case 'bank':
+      return MyAppIcons.bank;
+    case "stock":
+      return MyAppIcons.development;
+    case "e_wallet":
+      return MyAppIcons.smartPhone;
+    case "credit":
+      return MyAppIcons.creditCard;
+    case "cash":
+      return MyAppIcons.banknote;
+
+    default:
+      return const Icon(Icons.cases_sharp);
+  }
+}
+
 Widget buildListTileExpense({
   String title = '',
   String subtitle = '',
@@ -58,7 +76,7 @@ Widget buildListTileExpense({
     padding: const EdgeInsets.symmetric(horizontal: 8),
     child: ListTile(
       onTap: () {},
-      leading: generateIcon(title),
+      leading: generateCategoryIcon(title),
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: Text(
@@ -74,8 +92,6 @@ Widget buildListTileExpense({
 Widget buildHistoryExpense() {
   return Expanded(
     child: BlocBuilder<HomeBloc, HomeState>(
-      buildWhen: (previous, current) =>
-          previous.transactions != current.transactions,
       builder: (context, state) {
         if (state.transactions!.isEmpty) {
           return const Center(
@@ -104,4 +120,33 @@ Widget buildHistoryExpense() {
       },
     ),
   );
+}
+
+Color generateCategoryColor(String name) {
+  switch (name) {
+    case 'Xăng xe':
+      return Colors.orange;
+    case "Nhu yếu phẩm":
+      return Colors.green;
+    case "Giáo dục":
+      return Colors.blue;
+    case "Giải trí":
+      return Colors.purple;
+    case "Quà cáp":
+      return Colors.yellow;
+    case "Làm đẹp":
+      return Colors.pink;
+    case "Nhà ở":
+      return Colors.red;
+    case "Di chuyển":
+      return Colors.green;
+    case "Ăn uống":
+      return Colors.orange;
+    case "Thưởng":
+      return Colors.yellow;
+    case "Lương":
+      return Colors.blue;
+    default:
+      return Colors.pink;
+  }
 }
