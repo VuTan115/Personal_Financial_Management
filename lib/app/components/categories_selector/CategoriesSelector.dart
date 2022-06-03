@@ -211,7 +211,6 @@ class _CateGoriesSeletorState extends State<CateGoriesSeletor> {
                             children: <Widget>[
                               TextFormField(
                                 controller: _newCategoryName,
-                                keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: Colors.white,
