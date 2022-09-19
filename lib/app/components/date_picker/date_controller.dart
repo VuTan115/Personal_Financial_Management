@@ -7,16 +7,19 @@ import 'package:personal_financial_management/app/components/date_picker/rounded
 import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/utils.dart';
 import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
+import 'package:personal_financial_management/domain/blocs/statistic/statistic_bloc.dart';
 
 class MyDatePicker extends StatefulWidget {
-  MyDatePicker(
-      {Key? key,
-      required this.dateTime,
-      required this.isShowDatePicker,
-      required this.filter})
-      : super(key: key);
+  MyDatePicker({
+    Key? key,
+    required this.dateTime,
+    required this.isShowDatePicker,
+    required this.filter,
+    required this.pageKey,
+  }) : super(key: key);
   late DateTime? dateTime;
   bool isShowDatePicker;
+  final String pageKey;
   TransactionFilter filter;
   @override
   _MyDatePickerState createState() => _MyDatePickerState();
@@ -27,7 +30,6 @@ class _MyDatePickerState extends State<MyDatePicker> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _today = DateTime.now();
   }
@@ -36,7 +38,8 @@ class _MyDatePickerState extends State<MyDatePicker> {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 56),
-      color: Colors.transparent,
+      color: Colors.white,
+
       width: MediaQuery.of(context).size.width,
       // show date and two buttons of arrows to choose date
       child: Padding(
@@ -79,14 +82,11 @@ class _MyDatePickerState extends State<MyDatePicker> {
               }
             : () {},
         child: Container(
-          color: Colors.transparent,
+          color: Colors.white,
           height: double.maxFinite,
           child: Padding(
             padding: EdgeInsets.only(
                 left: MediaQuery.of(context).size.width * 0.1.toDouble()),
-
-            //vertical alignment this child
-
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -94,7 +94,7 @@ class _MyDatePickerState extends State<MyDatePicker> {
                     ? '${_today.month.toString().padLeft(2, '0')}/${_today.year}'
                     : widget.filter == TransactionFilter.week
                         ? '${monday.day.toString().padLeft(2, '0')}/${monday.month.toString().padLeft(2, '0')}/${monday.year}' +
-                            ' -> ' +
+                            ' - ' +
                             '${sunday.day.toString().padLeft(2, '0')}/${sunday.month.toString().padLeft(2, '0')}/${sunday.year}'
                         : '${_today.day.toString().padLeft(2, '0')}/${_today.month.toString().padLeft(2, '0')}/${_today.year}',
                 style: const TextStyle(
@@ -150,10 +150,7 @@ class _MyDatePickerState extends State<MyDatePicker> {
                     : (widget.filter == TransactionFilter.week)
                         ? _today.subtract(Duration(days: 7))
                         : _today.subtract(Duration(days: 1));
-                BlocProvider.of<HomeBloc>(context).add(
-                  HomeSubscriptionRequestedWithFilter(
-                      date: _today, filter: widget.filter),
-                );
+                homeBlocCall(date: _today, filter: widget.filter);
               });
             }),
         IconButton(
@@ -166,14 +163,27 @@ class _MyDatePickerState extends State<MyDatePicker> {
                   : (widget.filter == TransactionFilter.week)
                       ? _today.add(Duration(days: 7))
                       : _today.add(Duration(days: 1));
-              BlocProvider.of<HomeBloc>(context).add(
-                HomeSubscriptionRequestedWithFilter(
-                    date: _today, filter: widget.filter),
-              );
+              print(_today);
+              homeBlocCall(date: _today, filter: widget.filter);
             });
           },
         ),
       ],
     );
+  }
+
+  void homeBlocCall(
+      {required DateTime date, required TransactionFilter filter}) {
+    if (widget.pageKey == 'home') {
+      BlocProvider.of<HomeBloc>(context).add(
+        HomeSubscriptionRequestedWithFilter(
+            date: _today, filter: widget.filter),
+      );
+    }
+    if (widget.pageKey == 'statistic') {
+      print('statistic');
+      BlocProvider.of<StatisticBloc>(context)
+          .add(StatisticUpdateCategory(dateTime: _today));
+    }
   }
 }

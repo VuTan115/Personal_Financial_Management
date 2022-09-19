@@ -1,22 +1,62 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:personal_financial_management/app/components/colors/my_colors.dart';
+import 'package:personal_financial_management/app/components/icons/my_icons.dart';
 import 'package:personal_financial_management/app/utils/assets.dart';
 import 'package:personal_financial_management/app/utils/extentsions.dart';
+import 'package:personal_financial_management/domain/blocs/home_bloc/home_bloc.dart';
 
-class MyPieChart extends StatefulWidget {
-  const MyPieChart({Key? key}) : super(key: key);
+class StatisticChart extends StatefulWidget {
+  const StatisticChart(
+      {Key? key,
+      required this.titleChart,
+      required this.amountChart,
+      required this.totalBudget,
+      this.data})
+      : super(key: key);
+  final Widget titleChart;
+  final Widget amountChart;
+  final int totalBudget;
+  final data;
 
   @override
-  State<StatefulWidget> createState() => MyPieChartState();
+  State<StatefulWidget> createState() => StatisticChartState();
 }
 
-class MyPieChartState extends State {
+class StatisticChartState extends State<StatisticChart> {
   int touchedIndex = 100;
+
+  Map<String, String> _dummyData = {
+    // "Ăn uống": "40",
+    // "Giáo dục": "30",
+    // "Nhu yếu phẩm": "30",
+  };
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    widget.data.forEach((e) {
+      if (e['budget'] > 0 && (e['budget'] / widget.totalBudget) < 1) {
+        _dummyData.update(
+          e['name'],
+          (value) => "${(e['budget'] / widget.totalBudget * 100)}",
+          ifAbsent: () => "${(e['budget'] / widget.totalBudget * 100)}",
+        );
+      }
+      if (e['budget'] == -1) {
+        _dummyData.update(
+          e['name'],
+          (value) => "0",
+          ifAbsent: () => "0",
+        );
+      }
+    });
+
     return Container(
       color: Colors.transparent,
       child: Stack(
@@ -56,20 +96,8 @@ class MyPieChartState extends State {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Ngân sách',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: MyAppColors.gray600),
-                ),
-                Text(
-                  numberFormat.format(30000000),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: MyAppColors.gray900,
-                    overflow: TextOverflow.clip,
-                  ),
-                )
+                widget.titleChart,
+                widget.amountChart,
               ],
             ),
           )),
@@ -78,77 +106,63 @@ class MyPieChartState extends State {
     );
   }
 
+  // final dummyData =
   List<PieChartSectionData> showingSections() {
-    return List.generate(3, (i) {
+    // print(_dummyData);
+    double sum = 0;
+    List<PieChartSectionData> pieData = List.generate(_dummyData.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 20.0 : 16.0;
       final radius = isTouched ? 64.0 : 40.0;
       final widgetSize = isTouched ? 28.0 : 36.0;
+      sum += double.parse(_dummyData.values.elementAt(i).padLeft(4));
+      return PieChartSectionData(
+        color: generateCategoryColor(_dummyData.keys.elementAt(i)),
+        value: double.parse(_dummyData.values.elementAt(i).padLeft(4)),
+        title: isTouched
+            ? '${double.parse(_dummyData.values.elementAt(i).padLeft(4))}%'
+            : '',
+        radius: radius,
+        titleStyle: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          color: MyAppColors.white000,
+        ),
+        badgeWidget: _Badge(
+          SocialIcon.smartPhone,
+          size: widgetSize,
+          borderColor: Colors.transparent,
+          icon: generateCategoryIcon(_dummyData.keys.elementAt(i)),
+        ),
+        badgePositionPercentageOffset: isTouched ? 1.07 : .5,
+      );
+    }, growable: true);
 
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: MyAppColors.gray700,
-            value: 40,
-            title: isTouched ? '40%' : '',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: MyAppColors.white000,
-            ),
-            badgeWidget: _Badge(
-              SocialIcon.smartPhone,
-              size: widgetSize,
-              borderColor: Colors.transparent,
-            ),
-            badgePositionPercentageOffset: isTouched ? 1.07 : .5,
-          );
-        case 1:
-          return PieChartSectionData(
-            color: MyAppColors.gray500,
-            value: 30,
-            title: isTouched ? '30%' : '',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: MyAppColors.white000,
-            ),
-            badgeWidget: _Badge(
-              FinancialIcon.penny,
-              size: widgetSize,
-              borderColor: Colors.transparent,
-            ),
-            badgePositionPercentageOffset: isTouched ? 1.07 : .5,
-          );
-        case 2:
-          return PieChartSectionData(
-            color: MyAppColors.gray300,
-            value: 30,
-            title: isTouched ? '30%' : '',
-            radius: radius,
-            titleStyle: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: MyAppColors.white000,
-            ),
-            badgeWidget: _Badge(
-              FinancialIcon.bankBuilding,
-              size: widgetSize,
-              borderColor: Colors.transparent,
-            ),
-            badgePositionPercentageOffset: isTouched ? 1.07 : .5,
-          );
-        default:
-          throw 'Oh no';
-      }
-    });
+    pieData.add(PieChartSectionData(
+      color: MyAppColors.gray200,
+      value: 100 - sum,
+      title: '',
+      radius: 40,
+      titleStyle: TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: MyAppColors.white000,
+      ),
+      // badgeWidget: _Badge(
+      //   SocialIcon.smartPhone,
+      //   size: 36,
+      //   borderColor: Colors.transparent,
+      //   icon: MyAppIcons.person,
+      // ),
+      badgePositionPercentageOffset: 0.5,
+    ));
+    return pieData;
   }
 }
 
 class _Badge extends StatelessWidget {
   final String svgAsset;
+  final Widget? icon;
   final double size;
   final Color borderColor;
 
@@ -157,6 +171,7 @@ class _Badge extends StatelessWidget {
     Key? key,
     required this.size,
     required this.borderColor,
+    this.icon,
   }) : super(key: key);
 
   @override
@@ -182,10 +197,11 @@ class _Badge extends StatelessWidget {
       ),
       padding: EdgeInsets.all(size * .15),
       child: Center(
-        child: SvgPicture.asset(
-          svgAsset,
-          fit: BoxFit.contain,
-        ),
+        child: icon ??
+            SvgPicture.asset(
+              svgAsset,
+              fit: BoxFit.contain,
+            ),
       ),
     );
   }

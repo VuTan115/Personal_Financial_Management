@@ -13,7 +13,7 @@ class BudgetRepository {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<Map<String, dynamic>> res = await Dio().get(
-          '$IPAddress/api/budget',
+          '$IPAddressTan/api/budget',
           options: Options(headers: {'AuthToken': token}),
           queryParameters: {'timestamp': month.toString()});
       Map<String, dynamic>? result = res.data;
@@ -23,13 +23,13 @@ class BudgetRepository {
     }
   }
 
-  Future<Map<String, dynamic>> getBudgetDetail(String type) async {
+  Future<Map<String, dynamic>> getBudgetDetail(DateTime timestamp) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<Map<String, dynamic>> res = await Dio().get(
-          '$IPAddress/api/budget/detail',
+          '$IPAddressTan/api/budget/detail',
           options: Options(headers: {'AuthToken': token}),
-          queryParameters: {'is_output': type});
+          queryParameters: {'timestamp': timestamp.toString()});
       Map<String, dynamic>? result = res.data;
       return result!;
     } catch (error) {
@@ -38,10 +38,13 @@ class BudgetRepository {
   }
 
   Future<String> createCategoryBudget(
-      DateTime timestamp, String category_id, num amount) async {
+      {required DateTime timestamp,
+      required String category_id,
+      required num amount}) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
-      Response<String> res = await Dio().post('$IPAddress/api/budget/category',
+      Response<String> res = await Dio().post(
+          '$IPAddressTan/api/budget/category',
           options: Options(headers: {'AuthToken': token}),
           data: jsonEncode({
             "month": timestamp.toString(),
@@ -56,11 +59,11 @@ class BudgetRepository {
   }
 
   Future<Map<String, dynamic>> createTotalBudget(
-      DateTime timestamp, num amount) async {
+      {required DateTime timestamp, required num amount}) async {
     try {
       String? token = await FirebaseAuth.instance.currentUser?.getIdToken();
       Response<Map<String, dynamic>> res = await Dio().post(
-          '$IPAddress/api/budget',
+          '$IPAddressTan/api/budget',
           options: Options(headers: {'AuthToken': token}),
           data: jsonEncode({"month": timestamp.toString(), "amount": amount}));
       Map<String, dynamic>? result = res.data;
